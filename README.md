@@ -9,4 +9,7 @@ py -m pip install Django==6.0.2
 usr:pi
 mdp:pi
 
-ip Raspberry : http://192.168.0.10/
+ip Raspberry : 
+http://192.168.0.10/
+source venv/bin/activate
+python -m pip install Django==6.0.2
