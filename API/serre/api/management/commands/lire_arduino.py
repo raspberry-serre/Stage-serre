@@ -27,13 +27,12 @@ class Command(BaseCommand):
                     )
                     self.stdout.write(f"Sauvegardé : {data}")
                     
-                    # Vérifier si on dépasse 1000 enregistrements
+                    # Vérifier si on dépasse 500 enregistrements
                     total_count = Serre.objects.count()
-                    if total_count > 1000:
+                    if total_count > 500:
                         # Supprimer les plus anciens enregistrements
-                        to_delete = total_count - 1000
-                        oldest_records = Serre.objects.order_by('created_at')[:to_delete]
-                        oldest_records.delete()
-                        self.stdout.write(self.style.WARNING(f"Nettoyage : {to_delete} anciens enregistrements supprimés. Total : 1000"))
+                        to_delete = total_count - 500
+                        oldest_ids = Serre.objects.order_by('created_at').values_list('id', flat=True)[:to_delete]
+                        Serre.objects.filter(id__in=oldest_ids).delete()
             except Exception as e:
                 self.stdout.write(f"Erreur : {e}")
