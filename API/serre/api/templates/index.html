@@ -195,12 +195,11 @@
     <div class="container">
         <header>
             <div>
-                <h1>🌱 Données Serre</h1>
+                <h1>Données Serre</h1>
             </div>
             <div class="status">
                 <div class="status-indicator"></div>
                 <div>
-                    <div>Rafraîchissement automatique</div>
                     <div class="last-update">Dernière mise à jour: <span id="lastUpdate">--:--:--</span></div>
                 </div>
             </div>
@@ -209,9 +208,6 @@
         <div class="error-message" id="errorMessage"></div>
 
         <div class="controls">
-            <button id="refreshBtn" onclick="refreshData()">🔄 Rafraîchir maintenant</button>
-            <button id="toggleAutoBtn" onclick="toggleAutoRefresh()">⏸️ Arrêter le rafraîchissement</button>
-            <div class="refresh-rate">
                 Intervalle: <span id="refreshRate">5</span>s
                 <input type="range" id="refreshInput" min="1" max="30" value="5" style="width: 100px; vertical-align: middle;" onchange="changeRefreshRate(this.value)">
             </div>
@@ -247,27 +243,6 @@
                 <div class="card-value">--</div>
             </div>
         </div>
-
-        <div class="history-section">
-            <h2>Historique (10 derniers enregistrements)</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Température</th>
-                        <th>Humidité Air</th>
-                        <th>Humidité Sol</th>
-                        <th>Luminosité</th>
-                        <th>Servo</th>
-                        <th>Pompe</th>
-                        <th>Période</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody id="historyTable">
-                    <tr><td colspan="8" style="text-align: center;">Chargement...</td></tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script>
@@ -299,14 +274,6 @@
                 if (!lastResponse.ok) throw new Error('Erreur API');
                 const lastData = await lastResponse.json();
 
-                // Récupérer l'historique
-                const historyResponse = await fetch('/api/serre/');
-                if (!historyResponse.ok) throw new Error('Erreur API');
-                const historyData = await historyResponse.json();
-
-                // Masquer le message d'erreur
-                document.getElementById('errorMessage').style.display = 'none';
-
                 // Mettre à jour les cartes
                 updateCard('tempCard', lastData.temp.toFixed(1), '°C');
                 updateCard('humCard', lastData.hum.toFixed(1), '%');
@@ -315,9 +282,6 @@
                 updateCard('servoCard', lastData.servo, '°');
                 updateCard('periodeCard', lastData.periode, '');
                 updateCard('pompeCard', lastData.pompe, '');
-
-                // Mettre à jour l'historique
-                updateHistory(historyData);
 
                 // Ajouter une classe de mise à jour
                 document.querySelectorAll('.card').forEach(card => {
@@ -350,30 +314,6 @@
             }
         }
 
-        function updateHistory(data) {
-            const tbody = document.getElementById('historyTable');
-            tbody.innerHTML = '';
-
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucune donnée</td></tr>';
-                return;
-            }
-
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.temp.toFixed(1)} °C</td>
-                    <td>${row.hum.toFixed(1)} %</td>
-                    <td>${row.sol} %</td>
-                    <td>${row.lumière} Lux</td>
-                    <td>${row.servo} °</td>
-                    <td>${row.pompe}</td>
-                    <td>${row.periode}</td>
-                    <td><span class="timestamp">${formatDate(row.created_at)}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
 
         function toggleAutoRefresh() {
             autoRefreshEnabled = !autoRefreshEnabled;
