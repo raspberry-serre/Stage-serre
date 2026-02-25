@@ -226,24 +226,40 @@ if (now - lastServoUpdate >= SERVO_UPDATE_INTERVAL) {
   if (Serial.available()) {
     String cmdLine = Serial.readStringUntil('\n');
     cmdLine.trim();
+    Serial.print("[DEBUG] Reçu: '");
+    Serial.print(cmdLine);
+    Serial.println("'");
+    
     if (cmdLine.length() > 0) {
       // Expected commands: TOIT:OPEN, TOIT:CLOSE, TOIT:STOP
       if (cmdLine.startsWith("TOIT:")) {
         String arg = cmdLine.substring(5);
         arg.trim();
+        Serial.print("[DEBUG] Commande TOIT détectée, arg: '");
+        Serial.print(arg);
+        Serial.println("'");
+        
         if (arg == "OPEN") {
+          Serial.println("[DEBUG] -> OPEN: servoTarget = MAX");
           servoTarget = SERVO_MAX_ANGLE;
           servoTestActive = false;
         } else if (arg == "CLOSE") {
+          Serial.println("[DEBUG] -> CLOSE: servoTarget = MIN");
           servoTarget = SERVO_MIN_ANGLE;
           servoTestActive = false;
         } else if (arg == "STOP") {
-          // Stop movement by setting target to current position
+          Serial.println("[DEBUG] -> STOP: servoTarget = current");
           servoTarget = servoPosition;
           servoTestActive = false;
+        } else {
+          Serial.print("[DEBUG] Arg non reconnu: ");
+          Serial.println(arg);
         }
-        // Optional: ack back to host
+        Serial.print("[DEBUG] Nouveau servoTarget: ");
+        Serial.println(servoTarget);
         Serial.println("TOIT:ACK");
+      } else {
+        Serial.println("[DEBUG] Pas une commande TOIT");
       }
     }
   }

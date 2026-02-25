@@ -40,10 +40,14 @@ def toit_cmd(request):
         return Response({'error': 'invalid action'}, status=400)
 
     cmd = 'TOIT:OPEN' if action == 'open' else 'TOIT:CLOSE' if action == 'close' else 'TOIT:STOP'
+    
+    # Write to command file - lire_arduino.py will read and send it
     try:
-        # append to command file for the serial manager to pick up
+        print(f"[TOIT] Writing command to {CMD_FILE}: {cmd}")
         with open(CMD_FILE, 'a') as f:
             f.write(cmd + '\n')
-        return Response({'status': 'queued', 'cmd': cmd})
+        print(f"[TOIT] Successfully queued: {cmd}")
+        return Response({'status': 'queued', 'cmd': cmd, 'file': CMD_FILE})
     except Exception as e:
+        print(f"[TOIT] Error writing to {CMD_FILE}: {e}")
         return Response({'error': str(e)}, status=500)
