@@ -7,55 +7,43 @@ from api.models import Serre
 
 
 class Command(BaseCommand):
-    help = 'Lit les données Arduino via USB'
+    help = 'Read Arduino data via USB and continuously toggle servo'
 
     def handle(self, *args, **kwargs):
-        ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+        try:
+            ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+        except serial.SerialException:
+            try:
+                ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
+            except serial.SerialException:
+                self.stdout.write(
+                    "Erreur: Impossible d'ouvrir /dev/ttyACM0 ou /dev/ttyACM1"
+                )
+                return
 
         self.stdout.write("========================================")
-        self.stdout.write("En écoute sur /dev/ttyACM0...")
+        self.stdout.write("Listening on serial port...")
         self.stdout.write("========================================")
-
-        MODE_A_ENVOYER = "toit_1"   # <<< CHANGE ICI LA VALEUR (0 / 1 / 2)
 
         while True:
             try:
-                # -------- LECTURE DONNÉES --------
+                now = time.time()
+                # ---------------- READ SERIAL ----------------
                 line = ser.readline().decode('utf-8').strip()
                 if line:
                     print(f"[SERIAL] {line}")
 
-                    if line.startswith('{'):
-                        try:
-                            data = json.loads(line)
-                            Serre.objects.create(
-                                sol=data['sol'],
-                                temp=data['temp'],
-                                hum=data['hum'],
-                                lumière=data['lumiere'],
-                                periode=data['periode'],
-                                servo=data['servo'],
-                                pompe=data['pompe'],
-                                led=data.get('led', 'OFF')
-                            )
-                            self.stdout.write(f"Sauvegardé : {data}")
-
-                            total_count = Serre.objects.count()
-                            if total_count > 500:
-                                to_delete = total_count - 500
-                                oldest_ids = Serre.objects.order_by('created_at').values_list('id', flat=True)[:to_delete]
-                                Serre.objects.filter(id__in=oldest_ids).delete()
-
-                        except json.JSONDecodeError:
-                            pass
-
-                # -------- ENVOI SIMPLE D’UNE VALEUR --------
-                ser.write((MODE_A_ENVOYER + '\n').encode('utf-8'))
+                # ---------------- TOGGLE SERVO ----------------
+                ser.write(("toit_1\n").encode('utf-8'))
                 ser.flush()
+                print("[SERIAL] Command sent: toit_0")
+                time.sleep(4)
+                ser.write(("toit_0\n").encode('utf-8'))
+                ser.flush()
+                print("[SERIAL] Command sent: toit_1")
+                time.sleep(4)
 
-                time.sleep(1)  # évite d'envoyer en boucle trop vite
+                time.sleep(0.05)  # small sleep to avoid busy-wait
 
             except Exception as e:
                 self.stdout.write(f"Erreur: {e}")
-
-            time.sleep(0.05)
