@@ -221,4 +221,30 @@ if (now - lastServoUpdate >= SERVO_UPDATE_INTERVAL) {
     Serial.print("\"pompe\":\"");   Serial.print(pumpRunning ? "ON" : pumpLocked ? "LOCK" : "OFF"); Serial.print("\"");
     Serial.println("}");
   }
+
+  /* ====== READ COMMANDS FROM SERIAL (non-blocking) ====== */
+  if (Serial.available()) {
+    String cmdLine = Serial.readStringUntil('\n');
+    cmdLine.trim();
+    if (cmdLine.length() > 0) {
+      // Expected commands: TOIT:OPEN, TOIT:CLOSE, TOIT:STOP
+      if (cmdLine.startsWith("TOIT:")) {
+        String arg = cmdLine.substring(5);
+        arg.trim();
+        if (arg == "OPEN") {
+          servoTarget = SERVO_MAX_ANGLE;
+          servoTestActive = false;
+        } else if (arg == "CLOSE") {
+          servoTarget = SERVO_MIN_ANGLE;
+          servoTestActive = false;
+        } else if (arg == "STOP") {
+          // Stop movement by setting target to current position
+          servoTarget = servoPosition;
+          servoTestActive = false;
+        }
+        // Optional: ack back to host
+        Serial.println("TOIT:ACK");
+      }
+    }
+  }
 }
