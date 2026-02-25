@@ -23,11 +23,6 @@
 
         <div class="error-message" id="errorMessage"></div>
 
-        <div class="controls">
-                Intervalle: <span id="refreshRate">5</span>s
-                <input type="range" id="refreshInput" min="1" max="30" value="5" style="width: 100px; vertical-align: middle;" onchange="changeRefreshRate(this.value)">
-            </div>
-        </div>
 
         <div class="data-grid">
             <div class="card" id="tempCard">
@@ -63,7 +58,7 @@
 
     <script>
         let autoRefreshEnabled = true;
-        let refreshInterval = 5000; // 5 secondes
+        let refreshInterval = 10000; // 10 secondes
         let refreshTimer = null;
 
         function formatDate(dateString) {
