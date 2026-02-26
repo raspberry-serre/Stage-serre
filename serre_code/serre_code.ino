@@ -96,16 +96,6 @@ void loop() {
 
   float temp = lastTemp;
   float humAir = lastHum;
-
-  /* ====== JOUR / NUIT ====== */
-  if (isDay) {
-    if (!isnan(temp) && temp < TEMP_NIGHT_ON && lightValue == LOW)
-      isDay = false;
-  } else {
-    if (!isnan(temp) && (temp > TEMP_DAY_ON || lightValue == HIGH))
-      isDay = true;
-  }
-
   digitalWrite(LIGHT_RELAY_PIN, (!isDay && lightValue == LOW));
   lcd.setRGB(soilDry ? 255 : 0, soilDry ? 165 : 255, 0);
 
@@ -211,6 +201,17 @@ void loop() {
         }
 
       }
+      else if (cmd == TIME:)
+      {
+        arg = cmd.substring(5).toInt();
+        if (arg < 7 || arg > 18) {
+          // Nuit
+          isDay = false;
+        } else {
+          // Jour
+          isDay = true;
+        }
+      } 
 
       cmd = "";
     } else {

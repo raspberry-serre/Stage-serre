@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from django.shortcuts import render
 from .models import Serre
 from .serializers import SerreSerializer
+from datetime import datetime
+
 
 CMD_FILE = '/tmp/serre_cmds.txt'
 
@@ -10,6 +12,20 @@ CMD_FILE = '/tmp/serre_cmds.txt'
 TOIT_CLOSED_ANGLE = 110
 TOIT_OPEN_ANGLE = 180
 
+
+
+@api_view(['POST'])
+def sync_time(request):
+    now = datetime.now()
+    cmd = now.strftime("TIME:%H")
+
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write(cmd + '\n')
+        return Response({'status': 'queued', 'cmd': cmd})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
 
 def index(request):
     if request.method == "POST":
