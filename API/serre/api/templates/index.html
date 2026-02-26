@@ -17,7 +17,8 @@
             <div class="status">
                 <form method="POST">
                     {% csrf_token %}
-                    <button name="commande" value="toit_1">Ouvrir Toit</button>
+                    <button name="commande" value="toit_1">Ouvrir</button>
+                    <button name="commande" value="toit_0">Fermer</button>
                 </form>
                 <div class="status-indicator"></div>
                 <div>
