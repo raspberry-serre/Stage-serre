@@ -91,26 +91,6 @@
             document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('fr-FR');
         }
 
-        // Commande toit: envoie OPEN/CLOSE en fonction de la position actuelle du servo
-        function toit() {
-            const btn = document.getElementById('toit');
-            const servoText = document.querySelector('#servoCard .card-value').textContent || '';
-            const numeric = parseInt(servoText.replace(/[^0-9-]/g, '')) || 0;
-            const action = numeric < 90 ? 'open' : 'close';
-            btn.disabled = true;
-            fetch('/api/toit/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action })
-            }).then(r => r.json()).then(resp => {
-                btn.textContent = 'Commande envoyée';
-                setTimeout(() => { btn.disabled = false; btn.textContent = 'ouvrir/fermer le toit'; }, 1200);
-            }).catch(err => {
-                console.error('Erreur en envoyant commande toit', err);
-                btn.disabled = false;
-            });
-        }
-
         async function refreshData() {
             try {
                 // Récupérer la dernière donnée
