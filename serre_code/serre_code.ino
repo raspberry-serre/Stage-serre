@@ -51,8 +51,8 @@ unsigned long pumpLockStartTime = 0;
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
-int servoTarget = 110;     // position cible
-int servoPosition = servoTarget;   // position actuelle
+int servoTarget = 110;
+int servoPosition = servoTarget;
 
 /* ====== SERIAL ====== */
 String cmd = "";
@@ -67,7 +67,6 @@ void setup() {
 
   digitalWrite(PUMP_RELAY_PIN, LOW);
   digitalWrite(LIGHT_RELAY_PIN, LOW);
-
 
   dht.begin();
 
@@ -96,6 +95,7 @@ void loop() {
 
   float temp = lastTemp;
   float humAir = lastHum;
+
   digitalWrite(LIGHT_RELAY_PIN, (!isDay && lightValue == LOW));
   lcd.setRGB(soilDry ? 255 : 0, soilDry ? 165 : 255, 0);
 
@@ -115,29 +115,23 @@ void loop() {
     pumpLockStartTime = now;
     digitalWrite(PUMP_RELAY_PIN, LOW);
   }
-  
+
   /* ===== SERVO AUTO ===== */
-  if(temp>40){
-
+  if (temp > 40) {
     servoTarget = 180;
-
-
     if (!servoAttached) {
-      servo.attach(SERVO_PIN);   // attache le servo
+      servo.attach(SERVO_PIN);
       servoAttached = true;
     }
-
   }
 
-  if (temp<20){
-
+  if (temp < 20) {
     servoTarget = 110;
     if (!servoAttached) {
-      servo.attach(SERVO_PIN);   // attache le servo
+      servo.attach(SERVO_PIN);
       servoAttached = true;
     }
-    
-    }
+  }
 
   /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
   if (servoAttached && now - lastServoMove >= SERVO_INTERVAL) {
@@ -146,19 +140,16 @@ void loop() {
     if (servoPosition < servoTarget) {
       servoPosition += SERVO_STEP;
       servo.write(servoPosition);
-    }
-    else if (servoPosition > servoTarget) {
+    } else if (servoPosition > servoTarget) {
       servoPosition -= SERVO_STEP;
       servo.write(servoPosition);
-    }
-    else {
-      // Position atteinte → on détache pour économiser la batterie
+    } else {
       servo.detach();
       servoAttached = false;
     }
   }
 
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print(soilValue);
 
   /* ====== ENVOI JSON ====== */
@@ -170,10 +161,10 @@ void loop() {
     Serial.print("\"temp\":"); Serial.print(temp); Serial.print(",");
     Serial.print("\"hum\":"); Serial.print(humAir); Serial.print(",");
     Serial.print("\"lumiere\":"); Serial.print(lightValue); Serial.print(",");
-    Serial.print("\"periode\":\"day\",");   // or dynamically compute day/night
+    Serial.print("\"periode\":\""); Serial.print(isDay ? "day" : "night"); Serial.print("\",");
     Serial.print("\"servo\":"); Serial.print(servoPosition); Serial.print(",");
     Serial.print("\"pompe\":\""); Serial.print(pumpRunning ? "ON" : "OFF"); Serial.print("\",");
-    Serial.print("\"led\":\"OFF\"");  // or actual LED state
+    Serial.print("\"led\":\""); Serial.print(!isDay && lightValue == LOW ? "ON" : "OFF"); Serial.print("\"");
     Serial.println("}");
   }
 
@@ -186,32 +177,26 @@ void loop() {
 
       if (cmd == "toit_1") {
         servoTarget = 180;
-
         if (!servoAttached) {
-          servo.attach(SERVO_PIN);   // attache le servo
+          servo.attach(SERVO_PIN);
           servoAttached = true;
         }
       }
       else if (cmd == "toit_0") {
         servoTarget = 110;
-
         if (!servoAttached) {
-          servo.attach(SERVO_PIN);   // attache le servo
+          servo.attach(SERVO_PIN);
           servoAttached = true;
         }
-
       }
-      else if (cmd == TIME:)
-      {
-        arg = cmd.substring(5).toInt();
-        if (arg < 7 || arg > 18) {
-          // Nuit
+      else if (cmd.startsWith("TIME:")) {
+        int hour = cmd.substring(5).toInt(); 
+        if (hour < 7 || hour >= 20) {
           isDay = false;
         } else {
-          // Jour
           isDay = true;
         }
-      } 
+      }
 
       cmd = "";
     } else {
@@ -227,7 +212,5 @@ void loop() {
     digitalWrite(LIGHT_RELAY_PIN, HIGH);
     delay(1000);
     digitalWrite(LIGHT_RELAY_PIN, LOW);
-
-
   }
 }
