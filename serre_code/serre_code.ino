@@ -5,7 +5,7 @@
 
 /* ====== PINS ====== */
 #define SOIL_SENSOR_PIN A1
-#define LIGHT_SENSOR_PIN 2
+#define LIGHT_SENSOR_PIN A2
 #define DHT_PIN 3
 #define SERVO_PIN 4
 #define PUMP_RELAY_PIN 6
@@ -84,7 +84,7 @@ void loop() {
   bool soilDry = soilValue < SOIL_DRY_THRESHOLD;
 
   /* ====== LUMIERE ====== */
-  bool lightValue = digitalRead(LIGHT_SENSOR_PIN);
+ int lightValue = analogRead(LIGHT_SENSOR_PIN);
 
   /* ====== DHT ====== */
   if (now - lastDHTRead >= 2000) {
@@ -151,6 +151,8 @@ void loop() {
 
   //lcd.setCursor(0, 1);
   //lcd.print(soilValue);
+  lcd.setCursor(0,1);
+  lcd.print(lightValue);
 
   /* ====== ENVOI JSON ====== */
   if (now - lastSerialTime >= SERIAL_INTERVAL) {
@@ -192,8 +194,6 @@ void loop() {
       else if (cmd.startsWith("TIME:")) {
         int hour = cmd.substring(5).toInt(); 
         hour++;
-        lcd.setCursor(0,1);
-        lcd.print(hour);
         if (hour < 7 || hour >= 20) {
           isDay = false;
         } else {
