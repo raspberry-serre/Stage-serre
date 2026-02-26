@@ -150,7 +150,7 @@ void loop() {
   }
 
 
-  if(isDay == true && lightValue<600){
+  if(isDay == true && lightValue<200){
 
     digitalWrite(LIGHT_RELAY_PIN, HIGH);
     
