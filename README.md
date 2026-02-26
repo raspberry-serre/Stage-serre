@@ -20,3 +20,14 @@ python -m pip install Django==6.0.2
 
 python3 manage.py makemigrations
 python3 manage.py migrate
+
+Pour lancer le serveur:
+    si pas de venv:
+        Aller dans API
+        python -m venv venv
+        source venv/bin/activate //uniquement sur raspberry
+        
+    Aller dans API
+    source venv/bin/activate    
+    aller dans API/serre
+    python3 start.py

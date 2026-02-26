@@ -154,7 +154,7 @@ void loop() {
 
     digitalWrite(LIGHT_RELAY_PIN, HIGH);
     
-    }else if(lightValue>700){
+    }else if(lightValue>500){
 
        digitalWrite(LIGHT_RELAY_PIN, LOW);
     
