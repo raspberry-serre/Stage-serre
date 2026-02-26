@@ -96,7 +96,7 @@ void loop() {
   float temp = lastTemp;
   float humAir = lastHum;
 
-  digitalWrite(LIGHT_RELAY_PIN, (!isDay && lightValue == LOW));
+
   lcd.setRGB(soilDry ? 255 : 0, soilDry ? 165 : 255, 0);
 
   /* ====== POMPE ====== */
@@ -148,6 +148,17 @@ void loop() {
       servoAttached = false;
     }
   }
+
+
+  if(isDay == true && lightValue<600){
+
+    digitalWrite(LIGHT_RELAY_PIN, HIGH);
+    
+    }else if(lightValue>700){
+
+       digitalWrite(LIGHT_RELAY_PIN, LOW);
+    
+    }
 
   //lcd.setCursor(0, 1);
   //lcd.print(soilValue);
