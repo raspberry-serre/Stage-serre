@@ -26,7 +26,7 @@
 
 /* ====== SERVO ====== */
 #define SERVO_STEP 1
-#define SERVO_INTERVAL 20  
+#define SERVO_INTERVAL 20
 
 rgb_lcd lcd;
 DHT dht(DHT_PIN, DHT_TYPE);
@@ -153,7 +153,11 @@ void loop() {
     Serial.print("\"sol\":"); Serial.print(soilValue); Serial.print(",");
     Serial.print("\"temp\":"); Serial.print(temp); Serial.print(",");
     Serial.print("\"hum\":"); Serial.print(humAir); Serial.print(",");
-    Serial.print("\"servo\":"); Serial.print(servoPosition);
+    Serial.print("\"lumiere\":"); Serial.print(lightValue); Serial.print(",");
+    Serial.print("\"periode\":\"day\",");   // or dynamically compute day/night
+    Serial.print("\"servo\":"); Serial.print(servoPosition); Serial.print(",");
+    Serial.print("\"pompe\":\""); Serial.print(pumpRunning ? "ON" : "OFF"); Serial.print("\",");
+    Serial.print("\"led\":\"OFF\"");  // or actual LED state
     Serial.println("}");
   }
 
@@ -173,7 +177,7 @@ void loop() {
           servoAttached = true;
         }
 
-        lcd.setCursor(0,1);
+        lcd.setCursor(0, 1);
         lcd.print("ACK:toit_1");
       }
       else if (cmd == "toit_0") {
@@ -184,7 +188,7 @@ void loop() {
           servo.attach(SERVO_PIN);   // attache le servo sans changer la position actuelle
           servoAttached = true;
         }
-            lcd.setCursor(0,1);
+        lcd.setCursor(0, 1);
         lcd.print("ACK:toit_0");
 
       }
@@ -195,7 +199,7 @@ void loop() {
     }
   }
 
-  if(digitalRead(BUTTON_PIN) == HIGH){
+  if (digitalRead(BUTTON_PIN) == HIGH) {
     servo.attach(SERVO_PIN);
     servo.write(110);
     delay(1000);
