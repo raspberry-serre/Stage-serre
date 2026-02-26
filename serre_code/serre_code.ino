@@ -126,6 +126,18 @@ void loop() {
     digitalWrite(PUMP_RELAY_PIN, LOW);
   }
 
+  if(temp>20){
+
+    servoTarget = 180;
+    servoPosition = 110;
+
+    if (!servoAttached) {
+      servo.attach(SERVO_PIN);   // attache le servo
+      servoAttached = true;
+    }
+
+  }
+
   /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
   if (servoAttached && now - lastServoMove >= SERVO_INTERVAL) {
     lastServoMove = now;
@@ -144,9 +156,6 @@ void loop() {
       servoAttached = false;
     }
   }
-
-  lcd.setCursor(0,1);
-  lcd.print(soilValue);
 
   /* ====== ENVOI JSON ====== */
   if (now - lastSerialTime >= SERIAL_INTERVAL) {
@@ -176,20 +185,18 @@ void loop() {
         servoPosition = 110;
 
         if (!servoAttached) {
-          servo.attach(SERVO_PIN);   // attache le servo sans changer la position actuelle
+          servo.attach(SERVO_PIN);   // attache le servo
           servoAttached = true;
         }
-
       }
       else if (cmd == "toit_0") {
         servoTarget = 110;
         servoPosition = 180;
 
         if (!servoAttached) {
-          servo.attach(SERVO_PIN);   // attache le servo sans changer la position actuelle
+          servo.attach(SERVO_PIN);   // attache le servo
           servoAttached = true;
         }
-
 
       }
 
