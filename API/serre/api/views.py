@@ -4,7 +4,6 @@ from django.shortcuts import render
 from .models import Serre
 from .serializers import SerreSerializer
 import os
-import subprocess
 
 CMD_FILE = '/tmp/serre_cmds.txt'
 
@@ -12,7 +11,6 @@ CMD_FILE = '/tmp/serre_cmds.txt'
 def index(request):
     return render(request, 'index.html')
 
-subprocess.run(['python3', '/management/commands/com_arduino.py'])
 
 @api_view(['GET'])
 def get_serre(request):
