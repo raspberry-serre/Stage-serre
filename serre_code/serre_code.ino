@@ -145,6 +145,9 @@ void loop() {
     }
   }
 
+  lcd.setCursor(0,1);
+  lcd.print(soilValue);
+
   /* ====== ENVOI JSON ====== */
   if (now - lastSerialTime >= SERIAL_INTERVAL) {
     lastSerialTime = now;
@@ -177,8 +180,6 @@ void loop() {
           servoAttached = true;
         }
 
-        lcd.setCursor(0, 1);
-        lcd.print("ACK:toit_1");
       }
       else if (cmd == "toit_0") {
         servoTarget = 110;
@@ -188,8 +189,7 @@ void loop() {
           servo.attach(SERVO_PIN);   // attache le servo sans changer la position actuelle
           servoAttached = true;
         }
-        lcd.setCursor(0, 1);
-        lcd.print("ACK:toit_0");
+
 
       }
 
