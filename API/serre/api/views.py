@@ -8,10 +8,6 @@ import os
 CMD_FILE = '/tmp/serre_cmds.txt'
 
 
-def index(request):
-    return render(request, 'index.html')
-
-
 @api_view(['GET'])
 def get_serre(request):
     serre = Serre.objects.all().order_by('-created_at')[:10]
@@ -50,7 +46,6 @@ def toit_cmd(request):
 def index(request):
     if request.method == "POST":
         valeur = request.POST.get("commande")
-
         if valeur:
             try:
                 with open(CMD_FILE, 'a') as f:
@@ -59,4 +54,10 @@ def index(request):
             except Exception as e:
                 print(f"[index] Error: {e}")
 
-    return render(request, "index.html")
+    try:
+        lastserre = Serre.objects.latest('created_at')
+        servo = lastserre.servo
+    except Serre.DoesNotExist:
+        servo = 0
+
+    return render(request, "index.html", {'servo': servo})

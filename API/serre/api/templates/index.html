@@ -17,9 +17,12 @@
             <div class="status">
                 <form method="POST">
                     {% csrf_token %}
-                    <button id="btn-ouvrir" name="commande" value="toit_1" style="display:none;">Ouvrir</button>
-                    <button id="btn-fermer" name="commande" value="toit_0" style="display:none;">Fermer</button>
-                </form>
+                    {% if servo < 90 %}
+                        <button name="commande" value="toit_1">Ouvrir</button>
+                    {% else %}
+                        <button name="commande" value="toit_0">Fermer</button>
+                    {% endif %}
+</form>
                 <div class="status-indicator"></div>
                 <div>
                     <div class="last-update">Dernière mise à jour: <span id="lastUpdate">--:--:--</span></div>
@@ -68,7 +71,7 @@
 
     <script>
         let autoRefreshEnabled = true;
-        let refreshInterval = 2000;
+        let refreshInterval = 2000; // 2 secondes
         let refreshTimer = null;
 
         function formatDate(dateString) {
@@ -88,26 +91,14 @@
             document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('fr-FR');
         }
 
-        function updateToitButtons(servoValue) {
-            const btnOuvrir = document.getElementById('btn-ouvrir');
-            const btnFermer = document.getElementById('btn-fermer');
-            const numeric = parseInt(String(servoValue).replace(/[^0-9-]/g, '')) || 0;
-
-            if (numeric < 90) {
-                btnOuvrir.style.display = 'inline-block';
-                btnFermer.style.display = 'none';
-            } else {
-                btnOuvrir.style.display = 'none';
-                btnFermer.style.display = 'inline-block';
-            }
-        }
-
         async function refreshData() {
             try {
+                // Récupérer la dernière donnée
                 const lastResponse = await fetch('/api/last/');
                 if (!lastResponse.ok) throw new Error('Erreur API');
                 const lastData = await lastResponse.json();
 
+                // Mettre à jour les cartes
                 updateCard('tempCard', lastData.temp.toFixed(1), '°C');
                 updateCard('humCard', lastData.hum.toFixed(1), '%');
                 updateCard('solCard', lastData.sol, '%');
@@ -117,8 +108,7 @@
                 updateCard('pompeCard', lastData.pompe, '');
                 updateCard('ledCard', lastData.led, '');
 
-                updateToitButtons(lastData.servo);
-
+                // Mettre à jour l'indicateur led (petit cercle) et la carte
                 const ledIndicator = document.querySelector('.status-indicator');
                 const ledCard = document.getElementById('ledCard');
                 if (lastData.led && lastData.led === 'ON') {
@@ -131,6 +121,7 @@
                     ledCard.classList.add('inactive');
                 }
 
+                // Ajouter une classe de mise à jour
                 document.querySelectorAll('.card').forEach(card => {
                     card.style.animation = 'none';
                     setTimeout(() => {
@@ -152,6 +143,7 @@
             const valueElement = card.querySelector('.card-value');
             valueElement.textContent = value + (unit ? ' ' + unit : '');
 
+            // Ajouter des classes de couleur selon les valeurs
             card.classList.remove('warning', 'danger');
             if (cardId === 'tempCard' && parseFloat(value) > 30) {
                 card.classList.add('danger');
@@ -159,6 +151,7 @@
                 card.classList.add('warning');
             }
         }
+
 
         function toggleAutoRefresh() {
             autoRefreshEnabled = !autoRefreshEnabled;
@@ -189,11 +182,13 @@
             }
         }
 
+        // Initialiser
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
             startAutoRefresh();
         });
 
+        // Rafraîchir quand on revient sur la page
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && autoRefreshEnabled) {
                 refreshData();
