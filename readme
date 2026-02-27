@@ -3,3 +3,6 @@
 
 python.exe -m pip install --upgrade pip
 pip install -r requirements.txt   
+python -m django startproject mysite 
+cd .\mysite\
+python manage.py startapp api
