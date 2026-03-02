@@ -9,6 +9,29 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     padding: 20px;
+    
+}
+
+body2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;  /* horizontal */
+    align-items: center;      /* vertical */
+}
+
+.login-form {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    width: 300px;
 }
 
 .container {
@@ -167,7 +190,7 @@ button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #667eea;
+    background-color: #ea8066;
     color: white;
     cursor: pointer;
     font-size: 14px;
@@ -189,3 +212,11 @@ button:disabled {
     font-size: 12px;
 }
 
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 90%;
+    margin : 10px
+}

@@ -7,19 +7,24 @@
     <title>Login</title>
     <link rel="stylesheet" href="{% static 'style/style.css' %}">
 </head>
-<body> 
-    <form action="/index">
-        <button id="toIndexBtn">To index</button>
-    </form>
-    
-login page 
-<div>
-<input type="text" id="usr" name="username" required />
-<input type="password" id="pass" name="password" minlength="8" required />
-</div>   
+<body2> 
+    <div class="login-wrapper">
+        <form class="login-form">
+            <a href="/index">
+                <button type="button">To index</button>
+            </a>
 
+            <p>login page</p>
 
-</body>
+            <input type="text" required>
+            <input type="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body2>
 
 </html>
+
+
 
