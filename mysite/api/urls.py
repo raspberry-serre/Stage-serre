@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('serre/', views.get_serre),
-    path('last/', views.last_serre),
-    path('toit/', views.toit_cmd),
+    path('api/serre/', views.get_serre),
+    path('api/last/', views.last_serre),
+    path('api/toit/', views.toit_cmd),
 ]
