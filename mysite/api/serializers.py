@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Serre
+from .models import blogPost
 
-class SerreSerializer(serializers.ModelSerializer):
+class blogPostSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Serre
-        fields = '__all__'
+        model = blogPost
+        fields = ["id", "title", "content", "created_at"]
