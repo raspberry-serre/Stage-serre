@@ -45,7 +45,7 @@ def index(request):
     except Serre.DoesNotExist:
         pass
 
-    return render(request, "index.html", {'toit': 1 if toit_ouvert else 0})
+    return render(request, "i.html", {'toit': 1 if toit_ouvert else 0})
 
 
 @api_view(['GET'])
