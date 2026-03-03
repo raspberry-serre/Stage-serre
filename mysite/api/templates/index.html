@@ -101,7 +101,7 @@
                 if (lastData.pompe_lock === 600) {
                     updateCard('lockCard', 'Not Locked', '');
                 } else {
-                    updateCard('lockCard','Locked for : ', lastData.pompe_lock, 's');
+                    updateCard('lockCard','Locked : ', lastData.pompe_lock, 's');
                 }
 
                 // Sync bouton toit selon l'angle réel du servo
@@ -111,6 +111,8 @@
                     toitBtn.textContent = isOpen ? 'Fermer' : 'Ouvrir';
                     toitBtn.value = isOpen ? 'toit_0' : 'toit_1';
                 }
+
+                if (lastData.pompe_lock === 0) lastData.pompe_lock = 600;
 
                 // Indicateur LED
                 const ledIndicator = document.querySelector('.status-indicator');
