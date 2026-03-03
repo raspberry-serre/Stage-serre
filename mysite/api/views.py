@@ -94,8 +94,9 @@ def toit_cmd(request):
     action = action.lower()
     if action not in ('open', 'close'):
         return Response({'error': 'invalid action'}, status=400)
-
-    cmd = f"TOIT:{action.upper()}"
+    # Arduino firmware expects 'toit_1' (open) and 'toit_0' (close)
+    cmd_map = {'open': 'toit_1', 'close': 'toit_0'}
+    cmd = cmd_map[action]
 
     try:
         with open(CMD_FILE, 'a') as f:
