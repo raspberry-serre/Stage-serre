@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from .models import Serre, Usr
 from .serializers import SerreSerializer
 from datetime import datetime
+from django.utils import timezone
 from django.contrib.auth.hashers import check_password
 from .management.commands.logs import log_user_connection
 CMD_FILE = '/tmp/serre_cmds.txt'
@@ -16,7 +17,8 @@ TOIT_OPEN_ANGLE = 180
 # API pour synchroniser l'heure de l'Arduino avec celle du serveur
 @api_view(['POST'])
 def sync_time(request):
-    now = datetime.now()
+    # use Django's timezone-aware local time
+    now = timezone.localtime(timezone.now())
     cmd = now.strftime("TIME:%H")
 
     try:
