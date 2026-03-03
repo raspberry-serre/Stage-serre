@@ -167,10 +167,12 @@ void loop() {
   if (isDay == true && lightValue < 300) {
 
     digitalWrite(LIGHT_RELAY_PIN, HIGH);
+    LED_ON = true;
 
   } else if (lightValue > 690) {
 
     digitalWrite(LIGHT_RELAY_PIN, LOW);
+    LED_ON = false;
 
   }
 
@@ -191,7 +193,7 @@ void loop() {
     Serial.print("\"periode\":\""); Serial.print(isDay ? "day" : "night"); Serial.print("\",");
     Serial.print("\"servo\":"); Serial.print(servoPosition); Serial.print(",");
     Serial.print("\"pompe\":\""); Serial.print(pumpRunning ? "ON" : "OFF"); Serial.print("\",");
-    Serial.print("\"led\":\""); Serial.print(!isDay && lightValue == LOW ? "ON" : "OFF"); Serial.print("\",");
+    Serial.print("\"led\":\""); Serial.print(LED_ON ? "ON" : "OFF"); Serial.print("\",");
     Serial.print("\"pompe_lock\":\""); Serial.print(pumptime); Serial.print("\"");
     Serial.println("}");
   }
