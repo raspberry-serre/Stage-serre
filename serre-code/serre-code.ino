@@ -20,7 +20,7 @@
 #define TEMP_DAY_ON 22.0
 #define TEMP_NIGHT_ON 18.0
 
-#define PUMP_ON_TIME 100UL
+#define PUMP_ON_TIME 10000UL
 #define PUMP_LOCK_TIME 600000UL
 #define SERIAL_INTERVAL 1000UL
 
@@ -48,7 +48,7 @@ bool pumpRunning = false;
 bool pumpLocked = false;
 unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
-unsigned long pumptime = PUMP_LOCK_TIME;
+unsigned long pumptime = PUMP_LOCK_TIME/1000;
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
@@ -101,9 +101,14 @@ void loop() {
   lcd.setRGB(soilDry ? 255 : 0, soilDry ? 165 : 255, 0);
 
   /* ====== POMPE ====== */
-  if (pumpLocked && now - pumpLockStartTime >= PUMP_LOCK_TIME)
-    pumptime--;
-    pumpLocked = false;
+if (pumpLocked) {
+    if (now - pumpLockStartTime >= PUMP_LOCK_TIME) {
+        pumpLocked = false;       // unlock pump after 10 min
+        pumptime = 0;
+    } else {
+        pumptime = (PUMP_LOCK_TIME - (now - pumpLockStartTime)) / 1000; // seconds left
+    }
+}
 
   if (!pumpLocked && !pumpRunning && soilDry) {
     pumpRunning = true;
