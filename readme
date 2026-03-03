@@ -8,5 +8,3 @@ cd .\mysite\
 python manage.py startapp api
 python manage.py makemigrations
 python manage.py migrate 
-sudo apt update
-sudo apt install nginx  
