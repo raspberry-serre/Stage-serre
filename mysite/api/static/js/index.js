@@ -91,18 +91,71 @@
             }, refreshInterval);
         }
 
+        // read CSRF token from cookies
+        function getCookie(name) {
+            const nameEQ = name + '=';
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // send open/close command to API
+        async function sendToitCommand(action) {
+            try {
+                const csrftoken = getCookie('csrftoken');
+                const resp = await fetch('/api/toit/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken || ''
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                    throw new Error(err.error || resp.statusText);
+                }
+
+                console.log('[Toit] command queued:', action);
+                const toitBtn = document.getElementById('toitBtn');
+                if (toitBtn) {
+                    if (action === 'open') {
+                        toitBtn.textContent = 'Fermer';
+                        toitBtn.value = 'toit_0';
+                    } else {
+                        toitBtn.textContent = 'Ouvrir';
+                        toitBtn.value = 'toit_1';
+                    }
+                }
+            } catch (e) {
+                console.error('[Toit] failed to send command:', e);
+                const em = document.getElementById('errorMessage');
+                if (em) {
+                    em.textContent = 'Erreur en envoyant la commande toit: ' + e.message;
+                    em.style.display = 'block';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
             startAutoRefresh();
 
-            // Handle toit button click
             const toitBtn = document.getElementById('toitBtn');
             if (toitBtn) {
                 toitBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const form = toitBtn.closest('form');
-                    if (form) {
-                        form.submit();
+                    const val = toitBtn.value || '';
+                    if (val === 'toit_1') sendToitCommand('open');
+                    else if (val === 'toit_0') sendToitCommand('close');
+                    else {
+                        const text = (toitBtn.textContent || '').trim().toLowerCase();
+                        if (text.includes('ouvrir')) sendToitCommand('open');
+                        else sendToitCommand('close');
                     }
                 });
             }
