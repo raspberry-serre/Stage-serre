@@ -22,3 +22,10 @@ class Usr(models.Model):
 
     def __str__(self):
         return self.username
+
+class Logs(models.Model):
+    action = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Log {self.id}: {self.action}"
