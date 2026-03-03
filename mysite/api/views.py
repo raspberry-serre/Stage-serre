@@ -5,8 +5,6 @@ from .models import Serre, Usr
 from .serializers import SerreSerializer
 from datetime import datetime
 from django.contrib.auth.hashers import check_password
-
-
 CMD_FILE = '/tmp/serre_cmds.txt'
 
 # 110 = fermé, 180 = ouvert
@@ -38,6 +36,9 @@ def login(request):
         try:
             user = Usr.objects.get(username=username)
             if check_password(raw_password, user.password):
+                # Store user info in session
+                request.session['user_id'] = user.id
+                request.session['username'] = user.username
                 return redirect('index')
             else:
                 raise Usr.DoesNotExist
@@ -49,6 +50,12 @@ def login(request):
 
 # Page d'accueil qui affiche l'état du toit et permet d'envoyer des commandes à la serre
 def index(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('login')
+    
+    toit_ouvert = False
+    
     if request.method == "POST":
         valeur = request.POST.get("commande")
         if valeur:
@@ -59,7 +66,6 @@ def index(request):
             except Exception as e:
                 print(f"[index] Error: {e}")
 
-    toit_ouvert = False
     try:
         latest = Serre.objects.latest('created_at')
         toit_ouvert = latest.servo >= TOIT_OPEN_ANGLE
