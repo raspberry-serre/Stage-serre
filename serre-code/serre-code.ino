@@ -48,7 +48,7 @@ bool pumpRunning = false;
 bool pumpLocked = false;
 unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
-unsigned long pumptime = PUMP_LOCK_TIME/1000;
+unsigned long pumptime = 0;
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
@@ -103,7 +103,7 @@ void loop() {
   /* ====== POMPE ====== */
 if (pumpLocked) {
     if (now - pumpLockStartTime >= PUMP_LOCK_TIME) {
-        pumpLocked = false;       // unlock pump after 10 min
+        pumpLocked = false;       
         pumptime = 0;
     } else {
         pumptime = (PUMP_LOCK_TIME - (now - pumpLockStartTime)) / 1000; // seconds left
@@ -121,6 +121,7 @@ if (pumpLocked) {
     pumpLocked = true;
     pumpLockStartTime = now;
     digitalWrite(PUMP_RELAY_PIN, LOW);
+    
   }
 
   /* ===== SERVO AUTO ===== */
