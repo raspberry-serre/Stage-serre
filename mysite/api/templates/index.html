@@ -98,8 +98,8 @@
                 updateCard('periodeCard', lastData.periode, '');
                 updateCard('pompeCard', lastData.pompe, '');
                 updateCard('ledCard', lastData.led, '');
-                if (lastData.pompe_lock === 600) {
-                    updateCard('lockCard', 'Not Locked', '');
+                if (lastData.pompe_lock === 0) {
+                    updateCard('lockCard', 'Not Locked');
                 } else {
                     updateCard('lockCard','Locked : ', lastData.pompe_lock, 's');
                 }
@@ -112,7 +112,6 @@
                     toitBtn.value = isOpen ? 'toit_0' : 'toit_1';
                 }
 
-                if (lastData.pompe_lock === 0) lastData.pompe_lock = 600;
 
                 // Indicateur LED
                 const ledIndicator = document.querySelector('.status-indicator');
