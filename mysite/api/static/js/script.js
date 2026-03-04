@@ -1,5 +1,4 @@
-
-        const TOIT_CLOSED_ANGLE = 110; // servo fermé
+const TOIT_CLOSED_ANGLE = 110; // servo fermé
         const TOIT_OPEN_ANGLE = 180;   // servo ouvert
 
         let autoRefreshEnabled = true;
@@ -56,9 +55,8 @@
                 if (ledBtn) {
                     const isOn = lastData.led === 'ON';
                     ledBtn.textContent = isOn ? 'Éteindre' : 'Allumer';
-                    ledBtn.value = isOn ? 'led_off' : 'led_on';
+                    ledBtn.dataset.action = isOn ? 'off' : 'on';
                 }
-
 
                 // Indicateur LED
                 const ledIndicator = document.querySelector('.status-indicator');
@@ -122,7 +120,7 @@
             return null;
         }
 
-        // send open/close command to API
+        // send open/close command to toit API
         async function sendToitCommand(action) {
             try {
                 const csrftoken = getCookie('csrftoken');
@@ -161,6 +159,45 @@
             }
         }
 
+        // send on/off command to LED API
+        async function sendLedCommand(action) {
+            try {
+                const csrftoken = getCookie('csrftoken');
+                const resp = await fetch('/api/led/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken || ''
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                    throw new Error(err.error || resp.statusText);
+                }
+
+                console.log('[LED] command queued:', action);
+                const ledBtn = document.getElementById('ledBtn');
+                if (ledBtn) {
+                    if (action === 'on') {
+                        ledBtn.textContent = 'Éteindre';
+                        ledBtn.dataset.action = 'off';
+                    } else {
+                        ledBtn.textContent = 'Allumer';
+                        ledBtn.dataset.action = 'on';
+                    }
+                }
+            } catch (e) {
+                console.error('[LED] failed to send command:', e);
+                const em = document.getElementById('errorMessage');
+                if (em) {
+                    em.textContent = 'Erreur en envoyant la commande LED: ' + e.message;
+                    em.style.display = 'block';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
             startAutoRefresh();
@@ -176,6 +213,19 @@
                         const text = (toitBtn.textContent || '').trim().toLowerCase();
                         if (text.includes('ouvrir')) sendToitCommand('open');
                         else sendToitCommand('close');
+                    }
+                });
+            }
+
+            const ledBtn = document.getElementById('ledBtn');
+            if (ledBtn) {
+                ledBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const action = ledBtn.dataset.action || '';
+                    if (action === 'on' || action === 'off') sendLedCommand(action);
+                    else {
+                        const text = (ledBtn.textContent || '').trim().toLowerCase();
+                        sendLedCommand(text.includes('allumer') ? 'on' : 'off');
                     }
                 });
             }
