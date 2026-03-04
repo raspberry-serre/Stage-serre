@@ -79,27 +79,6 @@
     </div>
 
     <script src="{% static 'js/index.js' %}"></script>
-    <script>
-        function fetchLogs() {
-            fetch('/api/logs/')
-                .then(res => res.json())
-                .then(data => {
-                    const container = document.getElementById('logsContent');
-                    if (data.logs && data.logs.length > 0) {
-                        container.innerHTML = '<ul>' +
-                            data.logs.map(line => `<li>${line}</li>`).join('') +
-                        '</ul>';
-                    } else {
-                        container.innerHTML = '<em>Aucune Données</em>';
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('logsContent').innerHTML = '<em>Erreur de chargement</em>';
-                });
-        }
 
-        fetchLogs();
-        setInterval(fetchLogs, 5000);
-    </script>
 </body>
 </html>
