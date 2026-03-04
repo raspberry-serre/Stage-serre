@@ -13,7 +13,6 @@ TOIT_CLOSED_ANGLE = 110
 TOIT_OPEN_ANGLE = 180
 
 
-# API pour synchroniser l'heure de l'Arduino avec celle du serveur
 @api_view(['POST'])
 def sync_time(request):
     now = datetime.now()
@@ -27,7 +26,6 @@ def sync_time(request):
         return Response({'error': str(e)}, status=500)
 
 
-# Page de login pour accéder à l'interface de contrôle de la serre
 @api_view(['GET', 'POST'])
 def login(request):
     if request.method == "POST":
@@ -49,9 +47,7 @@ def login(request):
     return render(request, "login.html")
  
 
-# Page d'accueil qui affiche l'état du toit et permet d'envoyer des commandes à la serre
 def index(request):
-    # Check if user is logged in
     if 'user_id' not in request.session:
         return redirect('login')
     
@@ -77,16 +73,20 @@ def index(request):
     except Serre.DoesNotExist:
         pass
 
-    # fetch recent logs
+    return render(request, "index.html", {'toit': 1 if toit_ouvert else 0})
+
+
+@api_view(['GET'])
+def get_logs(request):
     from .models import Logs
-    recent_logs = Logs.objects.order_by('-created_at')
-    # convert to simple strings for template
-    log_lines = [f"{log.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {log.username} {log.action}" for log in recent_logs]
+    recent_logs = Logs.objects.order_by('-created_at')[:50]
+    log_lines = [
+        f"{log.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {log.username} {log.action}"
+        for log in recent_logs
+    ]
+    return Response({'logs': log_lines})
 
-    return render(request, "index.html", {'toit': 1 if toit_ouvert else 0, 'log_lines': log_lines})
 
-
-# API pour récupérer les données de la dernière mesure de la serre
 @api_view(['GET'])
 def last_serre(request):
     lastserre = Serre.objects.latest('created_at')
@@ -94,7 +94,6 @@ def last_serre(request):
     return Response(serializer.data)
 
 
-# API pour commander le toit de la serre (ouvrir, fermer)
 @api_view(['POST'])
 def toit_cmd(request):
     action = request.data.get('action')
@@ -105,7 +104,7 @@ def toit_cmd(request):
     action = action.lower()
     if action not in ('open', 'close'):
         return Response({'error': 'invalid action'}, status=400)
-    # Arduino firmware expects 'toit_1' (open) and 'toit_0' (close)
+
     cmd_map = {'open': 'toit_1', 'close': 'toit_0'}
     cmd = cmd_map[action]
 
