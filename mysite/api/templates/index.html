@@ -14,23 +14,34 @@
                 <h1>Données Serre</h1>
             </div>
             <div class="status">
+                {% if request.session.username %}
+                    <p>Connecté en tant que {{ request.session.username }}</p>
+                {% endif %}
+                <button id="deconnexionBtn"
+                    name="logout"
+                    value="deconnexion">
+                    Deconnexion
+                </button>
                 <form method="POST">
                     {% csrf_token %}
-                    <button id="toitBtn"
-                            name="commande"
-                            value="{% if toit == 0 %}toit_1{% else %}toit_0{% endif %}">
-                        {% if toit == 0 %}Ouvrir{% else %}Fermer{% endif %}
-                    </button>
                 </form>
                 <div class="status-indicator"></div>
                 <div>
                     <div class="last-update">Dernière mise à jour: <span id="lastUpdate">--:--:--</span></div>
                 </div>
+                <div>
+                    <label class="switch" id="modeSwitch">
+                        <input type="checkbox" id="modeCheckbox">
+                        <span class="slider"></span>
+                        <span class="switch-label on">Manuel</span>
+                        <span class="switch-label off">Autonome</span>
+                    </label>
+                </div>
             </div>
         </header>
 
         <div class="error-message" id="errorMessage"></div>
-
+        
         <div class="data-grid">
             <div class="card" id="tempCard">
                 <div class="card-title">Température</div>
@@ -48,21 +59,39 @@
                 <div class="card-title">Luminosité</div>
                 <div class="card-value">-- Lux</div>
             </div>
-            <div class="card" id="ledCard">
-                <div class="card-title">LED</div>
+            <div class="card" id="periodeCard">
+                <div class="card-title">Période</div>
                 <div class="card-value">--</div>
             </div>
             <div class="card" id="servoCard">
                 <div class="card-title">Servo</div>
                 <div class="card-value">-- °</div>
+                <button id="toitBtn"
+                    name="commande"
+                    value="{% if toit == 0 %}toit_open{% else %}toit_close{% endif %}">
+                    {% if toit == 0 %}Ouvrir{% else %}Fermer{% endif %}
+                </button>
             </div>
-            <div class="card" id="periodeCard">
-                <div class="card-title">Période</div>
+            <div class="card" id="ledCard">
+                <div class="card-title">LED</div>
                 <div class="card-value">--</div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button id="ledBtn"
+                        name="commande"
+                        value="{% if led == 1 %}led_off{% else %}led_on{% endif %}">
+                        {% if led == 1 %}Éteindre{% else %}Allumer{% endif %}
+                    </button>
+                </form>
             </div>
             <div class="card" id="pompeCard">
                 <div class="card-title">Pompe</div>
                 <div class="card-value">--</div>
+                <button id="pompeBtn"
+                    name="commande"
+                    value="{% if pompe == 0 %}pompe_on{% else %}pompe_off{% endif %}">
+                    {% if pompe == 0 %}Allumer{% else %}Éteindre{% endif %}
+                </button>
             </div>
             <div class="card" id="lockCard">
                 <div class="card-title">Pompe Lock</div>
@@ -70,108 +99,20 @@
             </div>
         </div>
     </div>
-
-    <script>
-        const TOIT_CLOSED_ANGLE = 110; // servo fermé
-        const TOIT_OPEN_ANGLE = 180;   // servo ouvert
-
-        let autoRefreshEnabled = true;
-        let refreshInterval = 2000;
-        let refreshTimer = null;
-
-        function updateLastUpdate() {
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('fr-FR');
-        }
-
-        async function refreshData() {
-            try {
-                const lastResponse = await fetch('/api/last/');
-                if (!lastResponse.ok) throw new Error('Erreur API');
-                const lastData = await lastResponse.json();
-
-                updateCard('tempCard', lastData.temp.toFixed(1), '°C');
-                updateCard('humCard', lastData.hum.toFixed(1), '%');
-                updateCard('solCard', lastData.sol, '%');
-                updateCard('lumiereCard', lastData.lumière, 'Lux');
-                updateCard('servoCard', lastData.servo, '°');
-                updateCard('periodeCard', lastData.periode, '');
-                updateCard('pompeCard', lastData.pompe, '');
-                updateCard('ledCard', lastData.led, '');
-                if (lastData.pompe_lock == 0) {
-                    updateCard('lockCard', 'Not Locked');
-                } else {
-                    updateCard('lockCard','Locked : ', lastData.pompe_lock, 's');
-                }
-
-                // Sync bouton toit selon l'angle réel du servo
-                const toitBtn = document.getElementById('toitBtn');
-                if (toitBtn) {
-                    const isOpen = lastData.servo >= TOIT_OPEN_ANGLE;
-                    toitBtn.textContent = isOpen ? 'Fermer' : 'Ouvrir';
-                    toitBtn.value = isOpen ? 'toit_0' : 'toit_1';
-                }
-
-
-                // Indicateur LED
-                const ledIndicator = document.querySelector('.status-indicator');
-                const ledCard = document.getElementById('ledCard');
-                if (lastData.led && lastData.led === 'ON') {
-                    ledIndicator.style.backgroundColor = '#4CAF50';
-                    ledCard.classList.add('active');
-                    ledCard.classList.remove('inactive');
-                } else {
-                    ledIndicator.style.backgroundColor = '#999';
-                    ledCard.classList.remove('active');
-                    ledCard.classList.add('inactive');
-                }
-
-                // Animation
-                document.querySelectorAll('.card').forEach(card => {
-                    card.style.animation = 'none';
-                    setTimeout(() => {
-                        card.style.animation = 'pulse 0.5s ease-in-out';
-                    }, 10);
-                });
-
-                document.getElementById('errorMessage').style.display = 'none';
-                updateLastUpdate();
-
-            } catch (error) {
-                console.error('Erreur lors du rafraîchissement:', error);
-                document.getElementById('errorMessage').textContent = 'Erreur de connexion à l\'API: ' + error.message;
-                document.getElementById('errorMessage').style.display = 'block';
-            }
-        }
-
-        function updateCard(cardId, value, unit) {
-            const card = document.getElementById(cardId);
-            const valueElement = card.querySelector('.card-value');
-            valueElement.textContent = value + (unit ? ' ' + unit : '');
-
-            card.classList.remove('warning', 'danger');
-            if (cardId === 'tempCard' && parseFloat(value) > 30) {
-                card.classList.add('danger');
-            } else if (cardId === 'humCard' && parseFloat(value) > 80) {
-                card.classList.add('warning');
-            }
-        }
-
-        function startAutoRefresh() {
-            clearInterval(refreshTimer);
-            refreshTimer = setInterval(() => {
-                if (autoRefreshEnabled) refreshData();
-            }, refreshInterval);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshData();
-            startAutoRefresh();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && autoRefreshEnabled) refreshData();
-        });
-    </script>
+    <!-- connection logs -->
+    <div class="card" id="logsCard">
+        <div class="card-value" id="logsContent">
+            {% if log_lines %}
+                <ul>
+                {% for line in log_lines %}
+                    <li>{{ line }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <em>Aucune donnée</em>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
