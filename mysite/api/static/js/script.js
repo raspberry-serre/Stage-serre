@@ -24,7 +24,7 @@ async function refreshData() {
         updateCard('periodeCard', lastData.periode, '');
         updateCard('pompeCard', lastData.pompe, '');
         updateCard('ledCard', lastData.led, '');
-        if (lastData.pompe_lock == 0 || lastData.pompe_lock == 600) {
+        if (lastData.pompe_lock == 0) {
             updateCard('lockCard', 'Not Locked');
         } else {
             updateCard('lockCard', 'Locked : ', lastData.pompe_lock, 's');
@@ -207,6 +207,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 var text = (ledBtn.textContent || '').trim().toLowerCase();
                 sendLedCommand(text.indexOf('allumer') >= 0 ? 'on' : 'off');
             }
+        });
+    }
+
+    var deconnexionBtn = document.getElementById('deconnexionBtn');
+    if (deconnexionBtn) {
+        deconnexionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/logout/';
         });
     }
 

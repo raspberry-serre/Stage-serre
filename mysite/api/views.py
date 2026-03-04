@@ -172,3 +172,9 @@ def led_cmd(request):
         return Response({'status': 'queued', 'cmd': cmd})
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+# Déconnexion de l'utilisateur
+def logout(request):
+    request.session.flush()
+    return redirect('login')

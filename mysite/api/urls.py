@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/last/', views.last_serre),
     path('api/toit/', views.toit_cmd),
     path('api/led/', views.led_cmd),
+    path('logout/', views.logout, name='logout'),
 ]
