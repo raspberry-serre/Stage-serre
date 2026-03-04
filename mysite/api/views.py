@@ -176,5 +176,6 @@ def led_cmd(request):
 
 # Déconnexion de l'utilisateur
 def logout(request):
+    log(request.session.get('username'), 'logged out')
     request.session.flush()
     return redirect('login')
