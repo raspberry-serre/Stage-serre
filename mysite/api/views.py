@@ -5,7 +5,7 @@ from .models import Serre, Usr
 from .serializers import SerreSerializer
 from datetime import datetime
 from django.contrib.auth.hashers import check_password
-from .management.commands.logs import log_user_connection
+from .management.commands.logs import log_user_action, log_user_connection
 CMD_FILE = '/tmp/serre_cmds.txt'
 
 # 110 = fermé, 180 = ouvert
@@ -37,10 +37,8 @@ def login(request):
         try:
             user = Usr.objects.get(username=username)
             if check_password(raw_password, user.password):
-                # Store user info in session
                 request.session['user_id'] = user.id
                 request.session['username'] = user.username
-                # Log the connection
                 log_user_connection(username)
                 return redirect('index')
             else:
@@ -61,6 +59,10 @@ def index(request):
     
     if request.method == "POST":
         valeur = request.POST.get("commande")
+        if valeur == "toit_1":
+            log_user_action(request.session.get('username'), 'opened the roof')
+        elif valeur == "toit_0":
+            log_user_action(request.session.get('username'), 'closed the roof')
         if valeur:
             try:
                 with open(CMD_FILE, 'a') as f:
@@ -77,7 +79,7 @@ def index(request):
 
     # fetch recent logs
     from .models import Logs
-    recent_logs = Logs.objects.order_by('-created_at')[:10]
+    recent_logs = Logs.objects.order_by('-created_at')
     # convert to simple strings for template
     log_lines = [f"{log.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {log.username} {log.action}" for log in recent_logs]
 
