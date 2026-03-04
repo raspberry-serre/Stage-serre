@@ -159,6 +159,15 @@
                     }
                 });
             }
+
+            // add refresh logs button handler
+            const refreshLogsBtn = document.getElementById('refreshLogsBtn');
+            if (refreshLogsBtn) {
+                refreshLogsBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    refreshData();
+                });
+            }
         });
 
         document.addEventListener('visibilitychange', () => {
