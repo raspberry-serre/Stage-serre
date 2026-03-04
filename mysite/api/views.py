@@ -95,9 +95,9 @@ def last_serre(request):
 def toit_cmd(request):
     action = request.data.get('action')
     if action == "open":
-        log(request.session.get('username'), 'opened the roof')
+        log(request.session.get('username'), 'toit ouvert')
     elif action == "close":
-        log(request.session.get('username'), 'closed the roof')
+        log(request.session.get('username'), 'toit fermé')
     if not action:
         return Response({'error': 'missing action'}, status=400)
 
