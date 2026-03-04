@@ -24,7 +24,7 @@ async function refreshData() {
         updateCard('periodeCard', lastData.periode, '');
         updateCard('pompeCard', lastData.pompe, '');
         updateCard('ledCard', lastData.led, '');
-        if (lastData.pompe_lock == 0 || lastData.pompe_lock == 600) {
+        if (lastData.pompe_lock == 0) {
             updateCard('lockCard', 'Not Locked');
         } else {
             updateCard('lockCard', 'Locked : ', lastData.pompe_lock, 's');
@@ -160,10 +160,13 @@ function initToggle() {
     if (!switchEl || !checkbox) return;
 
     function applyState() {
+        var label = document.getElementById('modeLabel');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
+            label.textContent = '1';
         } else {
             switchEl.classList.remove('is-checked');
+            label.textContent = '0';
         }
     }
 
