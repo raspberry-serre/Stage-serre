@@ -229,11 +229,11 @@ void loop() {
           isDay = true;
         }
       }
-      else if (cmd == "led_on") {
+      else if (cmd == "led_1") {
         digitalWrite(LIGHT_RELAY_PIN, HIGH);
         LED_ON = true;
       }
-      else if (cmd == "led_off") {
+      else if (cmd == "led_0") {
         digitalWrite(LIGHT_RELAY_PIN, LOW);
         LED_ON = false;
       }
