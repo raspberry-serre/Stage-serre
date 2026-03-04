@@ -39,7 +39,7 @@ def login(request):
             if check_password(raw_password, user.password):
                 request.session['user_id'] = user.id
                 request.session['username'] = user.username
-                log_user_connection(username)
+                log_user_connection(username, 'logged in')
                 return redirect('index')
             else:
                 raise Usr.DoesNotExist

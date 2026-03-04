@@ -1,12 +1,12 @@
 from api.models import Logs
 
 
-def log_user_connection(username):
+def log_user_connection(username,action):
     """Log a user connection to the Logs model"""
     try:
         Logs.objects.create(
             username=username,
-            action='login'
+            action=action
         )
     except Exception as e:
         print(f"[ERROR] Failed to log connection: {e}")
