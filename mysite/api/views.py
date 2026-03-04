@@ -94,7 +94,10 @@ def last_serre(request):
 @api_view(['POST'])
 def toit_cmd(request):
     action = request.data.get('action')
-    log(request.session.get('username'), action)
+    if action == "open":
+        log(request.session.get('username'), 'opened the roof')
+    elif action == "close":
+        log(request.session.get('username'), 'closed the roof')
     if not action:
         return Response({'error': 'missing action'}, status=400)
 
