@@ -59,9 +59,9 @@ def index(request):
     
     if request.method == "POST":
         valeur = request.POST.get("commande")
-        if valeur == "toit_1":
+        if valeur == "toit_open":
             log_user_action(request.session.get('username'), 'opened the roof')
-        elif valeur == "toit_0":
+        elif valeur == "toit_close":
             log_user_action(request.session.get('username'), 'closed the roof')
         if valeur:
             try:
