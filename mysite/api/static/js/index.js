@@ -144,21 +144,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
             startAutoRefresh();
-
-            const toitBtn = document.getElementById('toitBtn');
-            if (toitBtn) {
-                toitBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const val = toitBtn.value || '';
-                    if (val === 'toit_1') sendToitCommand('open');
-                    else if (val === 'toit_0') sendToitCommand('close');
-                    else {
-                        const text = (toitBtn.textContent || '').trim().toLowerCase();
-                        if (text.includes('ouvrir')) sendToitCommand('open');
-                        else sendToitCommand('close');
-                    }
-                });
-            }
         });
 
         document.addEventListener('visibilitychange', () => {
