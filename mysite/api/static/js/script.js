@@ -2,7 +2,7 @@ const TOIT_CLOSED_ANGLE = 110;
 const TOIT_OPEN_ANGLE = 180;
 
 let autoRefreshEnabled = true;
-let refreshInterval = 100;
+let refreshInterval = 1000;
 let refreshTimer = null;
 
 function updateLastUpdate() {
@@ -30,17 +30,6 @@ async function refreshData() {
             updateCard('lockCard', 'Locked : ', lastData.pompe_lock, 's');
         }
 
-        const logsContent = document.getElementById('logsContent');
-        if (logsContent && lastData.logs) {
-            if (lastData.logs.length) {
-                logsContent.innerHTML = '<ul>' +
-                    lastData.logs.map(function(l) { return '<li>' + l + '</li>'; }).join('') +
-                    '</ul>';
-            } else {
-                logsContent.innerHTML = '<em>Aucune donnée</em>';
-            }
-        }
-
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {
             const isOpen = lastData.servo >= TOIT_OPEN_ANGLE;
@@ -57,28 +46,35 @@ async function refreshData() {
 
         const ledIndicator = document.querySelector('.status-indicator');
         const ledCard = document.getElementById('ledCard');
-        if (lastData.led && lastData.led === 'ON') {
-            ledIndicator.style.backgroundColor = '#4CAF50';
-            ledCard.classList.add('active');
-            ledCard.classList.remove('inactive');
-        } else {
-            ledIndicator.style.backgroundColor = '#999';
-            ledCard.classList.remove('active');
-            ledCard.classList.add('inactive');
+        if (ledIndicator && ledCard) {
+            if (lastData.led && lastData.led === 'ON') {
+                ledIndicator.style.backgroundColor = '#4CAF50';
+                ledCard.classList.add('active');
+                ledCard.classList.remove('inactive');
+            } else {
+                ledIndicator.style.backgroundColor = '#999';
+                ledCard.classList.remove('active');
+                ledCard.classList.add('inactive');
+            }
         }
 
-        document.getElementById('errorMessage').style.display = 'none';
+        var errorMsg = document.getElementById('errorMessage');
+        if (errorMsg) errorMsg.style.display = 'none';
         updateLastUpdate();
 
     } catch (error) {
         console.error('Erreur lors du rafraîchissement:', error);
-        document.getElementById('errorMessage').textContent = "Erreur de connexion à l'API: " + error.message;
-        document.getElementById('errorMessage').style.display = 'block';
+        var errorMsg = document.getElementById('errorMessage');
+        if (errorMsg) {
+            errorMsg.textContent = "Erreur de connexion à l'API: " + error.message;
+            errorMsg.style.display = 'block';
+        }
     }
 }
 
 function updateCard(cardId, value, unit) {
     const card = document.getElementById(cardId);
+    if (!card) return;
     const valueElement = card.querySelector('.card-value');
     valueElement.textContent = value + (unit ? ' ' + unit : '');
 
@@ -172,7 +168,25 @@ async function sendModeCommand(mode) {
     }
 }
 
-// JS-driven toggle switch — works on all browsers
+function refreshLogs() {
+    var filter = document.getElementById('userFilter');
+    var user = filter ? filter.value : '';
+    fetch('/api/logs/?user_filter=' + encodeURIComponent(user))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var logsContent = document.getElementById('logsContent');
+            if (!logsContent) return;
+            if (data.logs && data.logs.length) {
+                logsContent.innerHTML = '<ul>' +
+                    data.logs.map(function(l) { return '<li>' + l + '</li>'; }).join('') +
+                    '</ul>';
+            } else {
+                logsContent.innerHTML = '<em>Aucune donnée</em>';
+            }
+        })
+        .catch(function() {});
+}
+
 function initToggle() {
     var switchEl = document.getElementById('modeSwitch');
     var checkbox = document.getElementById('modeCheckbox');
@@ -205,13 +219,18 @@ function initToggle() {
         e.preventDefault();
     });
 
-    applyState(); // set initial state
+    applyState();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    refreshData();
-    startAutoRefresh();
-    initToggle();
+    if (window.location.pathname === '/logs/') {
+        refreshLogs();
+        setInterval(refreshLogs, 2000);
+    } else {
+        refreshData();
+        startAutoRefresh();
+        initToggle();
+    }
 
     var toitBtn = document.getElementById('toitBtn');
     if (toitBtn) {
@@ -247,8 +266,24 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/logout/';
         });
     }
+
+    var logsBtn = document.getElementById('logsBtn');
+    if (logsBtn) {
+        logsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/logs/';
+        });
+    }
+
+    var HomeBtn = document.getElementById('HomeBtn');
+    if (HomeBtn) {
+        HomeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/index/';
+        });
+    }
 });
 
 document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && autoRefreshEnabled) refreshData();
+    if (!document.hidden && autoRefreshEnabled && window.location.pathname !== '/logs/') refreshData();
 });

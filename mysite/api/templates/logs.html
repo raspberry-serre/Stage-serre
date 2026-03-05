@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <link rel="stylesheet" href="{% static 'style/style.css' %}">
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Logs</h1>
+        </div>
+        <div class="status">
+            {% if request.session.username %}
+                <p>Connecté en tant que {{ request.session.username }}</p>
+            {% endif %}
+            <a href="{% url 'index' %}"><button>Home</button></a>
+        </div>
+    </header>
+
+    <div class="card" id="sortCard">
+        <div class="card-title">Trier par utilisateur</div>
+        <form method="GET" action="">
+            <select name="user_filter" id="userFilter" onchange="this.form.submit()">
+                <option value="">Tous</option>
+                {% for user in users %}
+                    <option value="{{ user.username }}" {% if selected_user == user.username %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="card" id="logsCard">
+        <div class="card-value" id="logsContent">
+            {% if log_lines %}
+                <ul>
+                {% for line in log_lines %}
+                    <li>{{ line }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <em>Aucune donnée</em>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

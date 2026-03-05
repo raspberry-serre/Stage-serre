@@ -17,11 +17,13 @@
                 {% if request.session.username %}
                     <p>Connecté en tant que {{ request.session.username }}</p>
                 {% endif %}
-                <button id="deconnexionBtn"
-                    name="logout"
-                    value="deconnexion">
-                    Deconnexion
+                {% if request.session.username == "admin" %}
+                <button id="logsBtn"
+                    name="logs"
+                    value="logs">
+                    logs
                 </button>
+                {% endif %}
                 <form method="POST">
                     {% csrf_token %}
                 </form>
@@ -37,6 +39,11 @@
                         <span class="switch-label off">Autonome</span>
                     </label>
                 </div>
+                <button id="deconnexionBtn"
+                    name="logout"
+                    value="deconnexion">
+                    Deconnexion
+                </button>
             </div>
         </header>
 
@@ -99,20 +106,6 @@
                 <div class="card-title">Pompe Lock</div>
                 <div class="card-value">-- s</div>
             </div>
-        </div>
-    </div>
-    <!-- connection logs -->
-    <div class="card" id="logsCard">
-        <div class="card-value" id="logsContent">
-            {% if log_lines %}
-                <ul>
-                {% for line in log_lines %}
-                    <li>{{ line }}</li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <em>Aucune donnée</em>
-            {% endif %}
         </div>
     </div>
     <script src="{% static 'js/script.js' %}"></script>
