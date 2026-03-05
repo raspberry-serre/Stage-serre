@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/led/', views.led_cmd),
     path('logout/', views.logout, name='logout'),
     path('api/mode/', views.auto_manuel, name='auto_manuel'),
+    path('new_account/', views.new_account, name='new_account'),
 ]

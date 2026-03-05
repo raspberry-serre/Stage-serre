@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from .models import Serre, Usr
 from .serializers import SerreSerializer
 from datetime import datetime
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 from .management.commands.logs import log
 CMD_FILE = '/tmp/serre_cmds.txt'
 
@@ -202,3 +202,22 @@ def logout(request):
     log(request.session.get('username'), 'logged out')
     request.session.flush()
     return redirect('login')
+
+# Création de compte
+def new_account(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        raw_password = request.POST.get("password")
+        
+        if not username or not raw_password:
+            return render(request, "new_account.html", {'error': 'Username and password are required'})
+        
+        if Usr.objects.filter(username=username).exists():
+            return render(request, "new_account.html", {'error': 'Username already exists'})
+        
+        password_hash = make_password(raw_password)
+        Usr.objects.create(username=username, password=password_hash)
+        log(username, 'account created')
+        return redirect('login')
+    
+    return render(request, "new_account.html")  
