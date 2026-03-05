@@ -153,6 +153,25 @@ async function sendLedCommand(action) {
     }
 }
 
+async function sendModeCommand(mode) {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/mode/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({ mode: mode })
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return { error: resp.statusText }; });
+            throw new Error(err.error || resp.statusText);
+        }
+        console.log('[Mode] command queued:', mode);
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur commande mode: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 // JS-driven toggle switch — works on all browsers
 function initToggle() {
     var switchEl = document.getElementById('modeSwitch');
@@ -160,18 +179,29 @@ function initToggle() {
     if (!switchEl || !checkbox) return;
 
     function applyState() {
+        var label = document.getElementById('modeLabel');
+        var toitBtn = document.getElementById('toitBtn');
+        var ledBtn = document.getElementById('ledBtn');
+        var pompeBtn = document.getElementById('pompeBtn');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
+            if (label) label.textContent = '1';
+            if (toitBtn) toitBtn.style.display = 'block';
+            if (ledBtn) ledBtn.style.display = 'block';
+            if (pompeBtn) pompeBtn.style.display = 'block';
         } else {
             switchEl.classList.remove('is-checked');
+            if (label) label.textContent = '0';
+            if (toitBtn) toitBtn.style.display = 'none';
+            if (ledBtn) ledBtn.style.display = 'none';
+            if (pompeBtn) pompeBtn.style.display = 'none';
         }
     }
 
-    // use click on the label instead of change on input for better compatibility
     switchEl.addEventListener('click', function(e) {
-        // toggle manually since we intercept the click
         checkbox.checked = !checkbox.checked;
         applyState();
+        sendModeCommand(checkbox.checked ? 'manuel' : 'auto');
         e.preventDefault();
     });
 
@@ -215,14 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
         deconnexionBtn.addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = '/logout/';
-        });
-    }
-
-    var refreshLogsBtn = document.getElementById('refreshLogsBtn');
-    if (refreshLogsBtn) {
-        refreshLogsBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            refreshData();
         });
     }
 });
