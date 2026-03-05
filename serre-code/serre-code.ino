@@ -56,6 +56,9 @@ bool servoAttached = false;
 int servoTarget = 110;
 int servoPosition = servoTarget;
 
+/* ====== MODE ====== */
+bool Mode = false;  // true = Manuel, false = Autonome
+
 /* ====== SERIAL ====== */
 String cmd = "";
 
@@ -101,6 +104,24 @@ void loop() {
 
   lcd.setRGB(soilDry ? 255 : 0, soilDry ? 165 : 255, 0);
 
+  /* ===== AUTO MODE =====*/
+  if (Mode) {
+  /* ===== SERVO AUTO ===== */
+  if (temp > 40) {
+    servoTarget = 180;
+    if (!servoAttached) {
+      servo.attach(SERVO_PIN);
+      servoAttached = true;
+    }
+  }
+
+  if (temp < 20) {
+    servoTarget = 110;
+    if (!servoAttached) {
+      servo.attach(SERVO_PIN);
+      servoAttached = true;
+    }
+  }
   /* ====== POMPE ====== */
 
   // ----- HANDLE LOCK COUNTDOWN -----
@@ -131,24 +152,24 @@ void loop() {
     digitalWrite(PUMP_RELAY_PIN, LOW);
   }
 
-  /* ===== SERVO AUTO ===== */
-  if (temp > 40) {
-    servoTarget = 180;
-    if (!servoAttached) {
-      servo.attach(SERVO_PIN);
-      servoAttached = true;
-    }
-  }
 
-  if (temp < 20) {
-    servoTarget = 110;
-    if (!servoAttached) {
-      servo.attach(SERVO_PIN);
-      servoAttached = true;
-    }
-  }
+  if (isDay == true && lightValue < 300) {
 
-  /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
+    digitalWrite(LIGHT_RELAY_PIN, HIGH);
+    LED_ON = true;
+
+  } else if (lightValue > 690) {
+
+    digitalWrite(LIGHT_RELAY_PIN, LOW);
+    LED_ON = false;
+
+  }
+}
+
+  lcd.setCursor(0, 1);
+  lcd.print(soilValue);
+
+    /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
   if (servoAttached && now - lastServoMove >= SERVO_INTERVAL) {
     lastServoMove = now;
 
@@ -163,24 +184,6 @@ void loop() {
       servoAttached = false;
     }
   }
-
-/*
-  if (isDay == true && lightValue < 300) {
-
-    digitalWrite(LIGHT_RELAY_PIN, HIGH);
-    LED_ON = true;
-
-  } else if (lightValue > 690) {
-
-    digitalWrite(LIGHT_RELAY_PIN, LOW);
-    LED_ON = false;
-
-  }
-*/
-  lcd.setCursor(0, 1);
-  lcd.print(soilValue);
-
-
 
   /* ====== ENVOI JSON ====== */
   if (now - lastSerialTime >= SERIAL_INTERVAL) {
@@ -239,14 +242,12 @@ void loop() {
       }
       else if (cmd == "mode_manuel"){
 
-        digitalWrite(LIGHT_RELAY_PIN, HIGH);
-        LED_ON = true;
+        Mode = true;
 
       }
       else if (cmd == "mode_auto"){
 
-        digitalWrite(LIGHT_RELAY_PIN, LOW);
-        LED_ON = false;
+        Mode = false;
 
       }
 
