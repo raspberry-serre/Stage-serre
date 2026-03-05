@@ -173,7 +173,30 @@ def led_cmd(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+@api_view(['POST'])
+def auto_manuel(request):
+    mode = request.data.get('mode')
+    if not mode:
+        return Response({'error': 'missing mode'}, status=400)
 
+    mode = mode.lower()
+    if mode not in ('auto', 'manuel'):
+        return Response({'error': 'invalid mode'}, status=400)
+
+    if mode == 'auto':
+        log(request.session.get('username'), 'mode auto')
+        cmd = 'mode_auto'
+    else:
+        log(request.session.get('username'), 'mode manuel')
+        cmd = 'mode_manuel'
+
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write(cmd + '\n')
+        return Response({'status': 'queued', 'cmd': cmd})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
 # Déconnexion de l'utilisateur
 def logout(request):
     log(request.session.get('username'), 'logged out')

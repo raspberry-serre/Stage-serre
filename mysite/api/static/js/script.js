@@ -153,6 +153,25 @@ async function sendLedCommand(action) {
     }
 }
 
+async function sendModeCommand(mode) {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/mode/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({ mode: mode })
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return { error: resp.statusText }; });
+            throw new Error(err.error || resp.statusText);
+        }
+        console.log('[Mode] command queued:', mode);
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur commande mode: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 // JS-driven toggle switch — works on all browsers
 function initToggle() {
     var switchEl = document.getElementById('modeSwitch');
@@ -162,6 +181,8 @@ function initToggle() {
     function applyState() {
         var label = document.getElementById('modeLabel');
         var toitBtn = document.getElementById('toitBtn');
+        var ledBtn = document.getElementById('ledBtn');
+        var pompeBtn = document.getElementById('pompeBtn');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
             if (label) label.textContent = '1';
@@ -172,7 +193,7 @@ function initToggle() {
             switchEl.classList.remove('is-checked');
             if (label) label.textContent = '0';
             if (toitBtn) toitBtn.style.display = 'none';
-            if (ledBtn) ledBtn.style.display = 'none';  
+            if (ledBtn) ledBtn.style.display = 'none';
             if (pompeBtn) pompeBtn.style.display = 'none';
         }
     }
@@ -180,6 +201,7 @@ function initToggle() {
     switchEl.addEventListener('click', function(e) {
         checkbox.checked = !checkbox.checked;
         applyState();
+        sendModeCommand(checkbox.checked ? 'manuel' : 'auto');
         e.preventDefault();
     });
 
