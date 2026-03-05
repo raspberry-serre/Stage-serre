@@ -237,6 +237,18 @@ void loop() {
         digitalWrite(LIGHT_RELAY_PIN, LOW);
         LED_ON = false;
       }
+      else if (cmd == "mode_manuel"){
+
+        digitalWrite(LIGHT_RELAY_PIN, HIGH);
+        LED_ON = true;
+
+      }
+      else if (cmd == "mode_auto"){
+
+        digitalWrite(LIGHT_RELAY_PIN, LOW);
+        LED_ON = false;
+
+      }
 
       cmd = "";
     } else {
