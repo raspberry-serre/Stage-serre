@@ -6,6 +6,8 @@ from .serializers import SerreSerializer
 from datetime import datetime
 from django.contrib.auth.hashers import check_password, make_password
 from .management.commands.logs import log
+from .models import Logs
+
 CMD_FILE = '/tmp/serre_cmds.txt'
 
 # 110 = fermé, 180 = ouvert
@@ -92,17 +94,25 @@ def index(request):
     except Serre.DoesNotExist:
         pass
 
-    # fetch recent logs
-    from .models import Logs
-    recent_logs = Logs.objects.order_by('-created_at')[:10]
-    log_lines = [f"{log.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {log.username} {log.action}" for log in recent_logs]
 
     return render(request, "index.html", {
         'toit': 1 if toit_ouvert else 0,
         'led': 1 if led_state else 0,
-        'log_lines': log_lines
     })
 
+def logs(request):
+    if 'user_id' not in request.session:
+        return redirect('login')
+    if request.session.get('username') != 'admin':
+        if request.session.get('username'):
+            log(request.session.get('username'), 'attempted to access logs')
+            return redirect('index')
+        else:
+            return redirect('login')
+            # fetch recent logs
+    recent_logs = Logs.objects.order_by('-created_at')[:10]
+    log_lines = [f"{log.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {log.username} {log.action}" for log in recent_logs]
+    return render(request, "logs.html", {'logs': log_lines})
 
 # API pour récupérer les données de la dernière mesure de la serre
 @api_view(['GET'])
@@ -221,3 +231,4 @@ def new_account(request):
         return redirect('login')
     
     return render(request, "new_account.html")  
+
