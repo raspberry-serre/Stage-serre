@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from api.models import Usr
 from api.serializers import UsrSerializer
-
+from django.contrib.auth.hashers import make_password
 
 
 class Command(BaseCommand):
@@ -35,9 +35,9 @@ class Command(BaseCommand):
             if not username or not password:
                 self.stdout.write(self.style.ERROR('username and password required'))
                 return
-            serializer = UsrSerializer(data={'username': username, 'password': password})
-            if serializer.is_valid():
-                usr = serializer.save()
+            password_hash = make_password(password)
+            if UsrSerializer.is_valid():
+                usr = UsrSerializer.save()
                 self.stdout.write(self.style.SUCCESS(f"created user {usr.username} (id {usr.id})"))
             else:
-                self.stdout.write(self.style.ERROR(str(serializer.errors)))
+                self.stdout.write(self.style.ERROR(str(UsrSerializer.errors)))

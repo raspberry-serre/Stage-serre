@@ -2,7 +2,7 @@ const TOIT_CLOSED_ANGLE = 110;
 const TOIT_OPEN_ANGLE = 180;
 
 let autoRefreshEnabled = true;
-let refreshInterval = 2000;
+let refreshInterval = 100;
 let refreshTimer = null;
 
 function updateLastUpdate() {
