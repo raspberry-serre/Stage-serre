@@ -26,6 +26,16 @@
                 {% endif %}
         </header>
 
+    <div class="card" id="sortCard">
+        <div class="card-title">Trier par utilisateur</div>
+        <select name="user_filter" id="userFilter">
+            <option value="">Tous</option>
+            {% for user in users %}
+                <option value="{{ user.username }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
     <!-- connection logs -->
     <div class="card" id="logsCard">
         <div class="card-value" id="logsContent">
