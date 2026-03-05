@@ -11,9 +11,9 @@
     <!-- connection logs -->
     <div class="card" id="logsCard">
         <div class="card-value" id="logsContent">
-            {% if log_lines %}
+            {% if logs %}
                 <ul>
-                {% for line in log_lines %}
+                {% for line in logs %}
                     <li>{{ line }}</li>
                 {% endfor %}
                 </ul>
