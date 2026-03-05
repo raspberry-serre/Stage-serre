@@ -117,11 +117,30 @@ def logs(request):
 
 
 @api_view(['GET'])
+def logs_api(request):
+    if 'user_id' not in request.session:
+        return Response({'error': 'not authenticated'}, status=401)
+    if request.session.get('username') != 'admin':
+        return Response({'error': 'forbidden'}, status=403)
+
+    selected_user = request.GET.get('user_filter', '')
+    recent_logs = Logs.objects.order_by('-created_at')
+    if selected_user:
+        recent_logs = recent_logs.filter(username=selected_user)
+
+    log_lines = [
+        f"{l.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {l.username} {l.action}"
+        for l in recent_logs
+    ]
+    return Response({'logs': log_lines})
+
+
+@api_view(['GET'])
 def last_serre(request):
     lastserre = Serre.objects.latest('created_at')
     serializer = SerreSerializer(lastserre)
 
-    recent_logs = Logs.objects.order_by('-created_at')
+    recent_logs = Logs.objects.order_by('-created_at')[:10]
     log_lines = [
         f"{l.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {l.username} {l.action}"
         for l in recent_logs
