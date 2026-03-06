@@ -292,7 +292,7 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden && autoRefreshEnabled && window.location.pathname !== '/logs/') refreshData();
 });
 
-// Auto-logout after 10 minutes
+// Auto-redirect to login after session timeout (no logout log)
 setTimeout(function() {
-    window.location.href = '/logout/';
+    window.location.href = '/';
 }, 1 * 6 * 1000);
