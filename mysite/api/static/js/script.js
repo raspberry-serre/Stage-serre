@@ -153,6 +153,24 @@ async function sendLedCommand(action) {
     }
 }
 
+async function sendPompeCommand(action) {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/pompe/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({ action: action })
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return { error: resp.statusText }; });
+            throw new Error(err.error || resp.statusText);
+        }
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur commande pompe: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 async function sendModeCommand(mode) {
     try {
         var csrftoken = getCookie('csrftoken');
@@ -263,6 +281,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    var pompeBtn = document.getElementById('pompeBtn');
+    if (pompeBtn) {
+        pompeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var action = pompeBtn.dataset.action || '';
+            if (action === 'on' || action === 'off') sendPompeCommand(action);
+            else {
+                var text = (pompeBtn.textContent || '').trim().toLowerCase();
+                sendPompeCommand(text.indexOf('allumer') >= 0 ? 'on' : 'off');
+            }
+        });
+    }
+
     var deconnexionBtn = document.getElementById('deconnexionBtn');
     if (deconnexionBtn) {
         deconnexionBtn.addEventListener('click', function(e) {
@@ -286,6 +317,8 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/index/';
         });
     }
+
+
 });
 
 document.addEventListener('visibilitychange', function() {

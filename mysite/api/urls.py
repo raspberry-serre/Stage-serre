@@ -12,4 +12,5 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('new_account/', views.new_account, name='new_account'),
     path('logs/', views.logs, name='logs'),
+    path('api/pompe/', views.pompe_cmd, name='pompe_cmd'),
 ]

@@ -213,6 +213,26 @@ def led_cmd(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+@api_view(['POST'])
+def pompe_cmd(request):
+    action = request.data.get('action')
+    if not action:
+        return Response({'error': 'missing action'}, status=400)
+
+    action = action.lower()
+    if action not in ('on', 'off'):
+        return Response({'error': 'invalid action'}, status=400)
+
+    log(request.session.get('username', 'inconnu'), f'Pompe : {action}')
+
+    cmd = {'on': 'pompe_1', 'off': 'pompe_0'}[action]
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write(cmd + '\n')
+        return Response({'status': 'queued', 'cmd': cmd})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
 
 @api_view(['POST'])
 def auto_manuel(request):
