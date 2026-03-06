@@ -13,6 +13,10 @@ function updateLastUpdate() {
 async function refreshData() {
     try {
         const lastResponse = await fetch('/api/last/');
+        if (lastResponse.status === 401 || (lastResponse.redirected && lastResponse.url.includes('/login'))) {
+            window.location.href = '/';
+            return;
+        }
         if (!lastResponse.ok) throw new Error('Erreur API');
         const lastData = await lastResponse.json();
 
@@ -149,6 +153,24 @@ async function sendLedCommand(action) {
     }
 }
 
+async function sendPompeCommand(action) {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/pompe/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({ action: action })
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return { error: resp.statusText }; });
+            throw new Error(err.error || resp.statusText);
+        }
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur commande pompe: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 async function sendModeCommand(mode) {
     try {
         var csrftoken = getCookie('csrftoken');
@@ -259,6 +281,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    var pompeBtn = document.getElementById('pompeBtn');
+    if (pompeBtn) {
+        pompeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var action = pompeBtn.dataset.action || '';
+            if (action === 'on' || action === 'off') sendPompeCommand(action);
+            else {
+                var text = (pompeBtn.textContent || '').trim().toLowerCase();
+                sendPompeCommand(text.indexOf('allumer') >= 0 ? 'on' : 'off');
+            }
+        });
+    }
+
     var deconnexionBtn = document.getElementById('deconnexionBtn');
     if (deconnexionBtn) {
         deconnexionBtn.addEventListener('click', function(e) {
@@ -282,8 +317,15 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/index/';
         });
     }
+
+
 });
 
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden && autoRefreshEnabled && window.location.pathname !== '/logs/') refreshData();
 });
+
+// Auto-redirect to login after session timeout (no logout log)
+setTimeout(function() {
+    window.location.href = '/';
+}, 10 * 60 * 1000);
