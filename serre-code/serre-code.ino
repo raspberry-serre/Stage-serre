@@ -47,6 +47,7 @@ bool LED_ON = false;
 /* ====== POMPE ====== */
 bool pumpRunning = false;
 bool pumpLocked = false;
+bool force_pompe = false;
 unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
 unsigned long pumptime = PUMP_LOCK_TIME / 1000;
@@ -95,7 +96,7 @@ void loop() {
   if (now - lastDHTRead >= 2000) {
     lastDHTRead = now;
     lastTemp = dht.readTemperature();
-    lastHum  = dht.readHumidity();
+    lastHum = dht.readHumidity();
   }
 
   float temp = lastTemp;
@@ -106,20 +107,32 @@ void loop() {
 
   /* ===== AUTO MODE =====*/
   if (Mode) {
-  /* ===== SERVO AUTO ===== */
-  if (temp > 40) {
-    servoTarget = 180;
-    if (!servoAttached) {
-      servo.attach(SERVO_PIN);
-      servoAttached = true;
+    /* ===== SERVO AUTO ===== */
+    if (temp > 40) {
+      servoTarget = 180;
+      if (!servoAttached) {
+        servo.attach(SERVO_PIN);
+        servoAttached = true;
+      }
     }
-  }
 
-  if (temp < 15) {
-    servoTarget = 110;
-    if (!servoAttached) {
-      servo.attach(SERVO_PIN);
-      servoAttached = true;
+    if (temp < 15) {
+      servoTarget = 110;
+      if (!servoAttached) {
+        servo.attach(SERVO_PIN);
+        servoAttached = true;
+      }
+    }
+
+    if (isDay == true && lightValue < 300) {
+
+      digitalWrite(LIGHT_RELAY_PIN, HIGH);
+      LED_ON = true;
+
+    } else if (lightValue > 690) {
+
+      digitalWrite(LIGHT_RELAY_PIN, LOW);
+      LED_ON = false;
     }
   }
   /* ====== POMPE ====== */
@@ -133,12 +146,12 @@ void loop() {
       pumpLocked = false;
       pumptime = 0;  // countdown finished
     } else {
-      pumptime = (PUMP_LOCK_TIME - elapsed) / 1000; // seconds remaining
+      pumptime = (PUMP_LOCK_TIME - elapsed) / 1000;  // seconds remaining
     }
   }
 
   // ----- START PUMP -----
-  if (!pumpLocked && !pumpRunning && soilDry) {
+  if (!pumpLocked && (!pumpRunning && (soilDry || force_pompe == true))) {
     pumpRunning = true;
     pumpStartTime = now;
     digitalWrite(PUMP_RELAY_PIN, HIGH);
@@ -149,27 +162,14 @@ void loop() {
     pumpRunning = false;
     pumpLocked = true;
     pumpLockStartTime = now;
+    force_pompe = false;
     digitalWrite(PUMP_RELAY_PIN, LOW);
   }
-
-
-  if (isDay == true && lightValue < 300) {
-
-    digitalWrite(LIGHT_RELAY_PIN, HIGH);
-    LED_ON = true;
-
-  } else if (lightValue > 690) {
-
-    digitalWrite(LIGHT_RELAY_PIN, LOW);
-    LED_ON = false;
-
-  }
-}
 
   lcd.setCursor(0, 1);
   lcd.print(soilValue);
 
-    /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
+  /* ====== MOUVEMENT SERVO PROGRESSIF ====== */
   if (servoAttached && now - lastServoMove >= SERVO_INTERVAL) {
     lastServoMove = now;
 
@@ -190,15 +190,33 @@ void loop() {
     lastSerialTime = now;
 
     Serial.print("{");
-    Serial.print("\"sol\":"); Serial.print(soilValue); Serial.print(",");
-    Serial.print("\"temp\":"); Serial.print(temp); Serial.print(",");
-    Serial.print("\"hum\":"); Serial.print(humAir); Serial.print(",");
-    Serial.print("\"lumiere\":"); Serial.print(lightValue); Serial.print(",");
-    Serial.print("\"periode\":\""); Serial.print(isDay ? "day" : "night"); Serial.print("\",");
-    Serial.print("\"servo\":"); Serial.print(servoPosition); Serial.print(",");
-    Serial.print("\"pompe\":\""); Serial.print(pumpRunning ? "ON" : "OFF"); Serial.print("\",");
-    Serial.print("\"led\":\""); Serial.print(LED_ON ? "ON" : "OFF"); Serial.print("\",");
-    Serial.print("\"pompe_lock\":\""); Serial.print(pumptime); Serial.print("\"");
+    Serial.print("\"sol\":");
+    Serial.print(soilValue);
+    Serial.print(",");
+    Serial.print("\"temp\":");
+    Serial.print(temp);
+    Serial.print(",");
+    Serial.print("\"hum\":");
+    Serial.print(humAir);
+    Serial.print(",");
+    Serial.print("\"lumiere\":");
+    Serial.print(lightValue);
+    Serial.print(",");
+    Serial.print("\"periode\":\"");
+    Serial.print(isDay ? "day" : "night");
+    Serial.print("\",");
+    Serial.print("\"servo\":");
+    Serial.print(servoPosition);
+    Serial.print(",");
+    Serial.print("\"pompe\":\"");
+    Serial.print(pumpRunning ? "ON" : "OFF");
+    Serial.print("\",");
+    Serial.print("\"led\":\"");
+    Serial.print(LED_ON ? "ON" : "OFF");
+    Serial.print("\",");
+    Serial.print("\"pompe_lock\":\"");
+    Serial.print(pumptime);
+    Serial.print("\"");
     Serial.println("}");
   }
 
@@ -215,15 +233,13 @@ void loop() {
           servo.attach(SERVO_PIN);
           servoAttached = true;
         }
-      }
-      else if (cmd == "toit_0") {
+      } else if (cmd == "toit_0") {
         servoTarget = 110;
         if (!servoAttached) {
           servo.attach(SERVO_PIN);
           servoAttached = true;
         }
-      }
-      else if (cmd.startsWith("TIME:")) {
+      } else if (cmd.startsWith("TIME:")) {
         int hour = cmd.substring(5).toInt();
         hour++;
         if (hour < 7 || hour >= 20) {
@@ -231,25 +247,27 @@ void loop() {
         } else {
           isDay = true;
         }
-      }
-      else if (cmd == "led_1") {
+      } else if (cmd == "led_1") {
         digitalWrite(LIGHT_RELAY_PIN, HIGH);
         LED_ON = true;
-      }
-      else if (cmd == "led_0") {
+      } else if (cmd == "led_0") {
         digitalWrite(LIGHT_RELAY_PIN, LOW);
         LED_ON = false;
-      }
-      else if (cmd == "mode_manuel"){
+      } else if (cmd == "mode_manuel") {
 
         Mode = false;
 
-      }
-      else if (cmd == "mode_auto"){
+      } else if (cmd == "mode_auto") {
 
         Mode = true;
 
+      } else if (cmd == "pompe_on") {
+        if (!pumpLocked) {
+          force_pompe = true;  // Forcer la pompe à s'allumer
+        }
       }
+
+
 
       cmd = "";
     } else {
