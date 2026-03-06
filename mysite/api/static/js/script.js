@@ -13,6 +13,10 @@ function updateLastUpdate() {
 async function refreshData() {
     try {
         const lastResponse = await fetch('/api/last/');
+        if (lastResponse.status === 401 || (lastResponse.redirected && lastResponse.url.includes('/login'))) {
+            window.location.href = '/';
+            return;
+        }
         if (!lastResponse.ok) throw new Error('Erreur API');
         const lastData = await lastResponse.json();
 
@@ -287,3 +291,8 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden && autoRefreshEnabled && window.location.pathname !== '/logs/') refreshData();
 });
+
+// Auto-logout after 10 minutes
+setTimeout(function() {
+    window.location.href = '/logout/';
+}, 1 * 6 * 1000);

@@ -11,6 +11,7 @@ CMD_FILE = '/tmp/serre_cmds.txt'
 
 TOIT_CLOSED_ANGLE = 110
 TOIT_OPEN_ANGLE = 180
+SESSION_TIMEOUT = 6
 
 CMD_MAP = {
     'led_on':  'led_1',
@@ -18,6 +19,21 @@ CMD_MAP = {
     'toit_1':  'toit_1',
     'toit_0':  'toit_0',
 }
+
+
+def check_session(request):
+    """Returns True if session is valid, False if expired or missing."""
+    if 'user_id' not in request.session:
+        return False
+    login_time = request.session.get('login_time')
+    if not login_time:
+        return False
+    elapsed = datetime.now().timestamp() - login_time
+    if elapsed > SESSION_TIMEOUT:
+        log(request.session.get('username'), 'session expired')
+        request.session.flush()
+        return False
+    return True
 
 
 @api_view(['POST'])
@@ -42,6 +58,7 @@ def login(request):
             if check_password(raw_password, user.password):
                 request.session['user_id'] = user.id
                 request.session['username'] = user.username
+                request.session['login_time'] = datetime.now().timestamp()
                 log(username, 'logged in')
                 return redirect('index')
             else:
@@ -52,11 +69,10 @@ def login(request):
 
 
 def index(request):
-    if 'user_id' not in request.session:
+    if not check_session(request):
         return redirect('login')
 
     toit_ouvert = False
-
     if request.method == "POST":
         valeur = request.POST.get("commande")
         if valeur:
@@ -91,7 +107,7 @@ def index(request):
 
 
 def logs(request):
-    if 'user_id' not in request.session:
+    if not check_session(request):
         return redirect('login')
     if request.session.get('username') != 'admin':
         log(request.session.get('username'), 'attempted to access logs')
@@ -118,7 +134,7 @@ def logs(request):
 
 @api_view(['GET'])
 def logs_api(request):
-    if 'user_id' not in request.session:
+    if not check_session(request):
         return Response({'error': 'not authenticated'}, status=401)
     if request.session.get('username') != 'admin':
         return Response({'error': 'forbidden'}, status=403)
@@ -137,6 +153,8 @@ def logs_api(request):
 
 @api_view(['GET'])
 def last_serre(request):
+    if not check_session(request):
+        return Response({'error': 'not authenticated'}, status=401)
     lastserre = Serre.objects.latest('created_at')
     serializer = SerreSerializer(lastserre)
 
