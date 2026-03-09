@@ -107,17 +107,17 @@
                 <div class="card-value">-- s</div>
             </div>
         </div>
-    </div>
+        <div id="webGL"></div>
+            <script type="importmap">
+                {
+                    "imports": {
+                        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+                    }
+                }
+            </script>
+        </div>
 
-    <div id="webGL" style="transform: translateX(140px);"></div>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
-        }
-    }
-</script>
 
     <script type="module" src="{% static 'js/WebGL.js' %}"></script>
     <script src="{% static 'js/script.js' %}"></script>
