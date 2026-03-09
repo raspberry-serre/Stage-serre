@@ -257,6 +257,11 @@ def auto_manuel(request):
 
 def logout(request):
     log(request.session.get('username'), 'logged out')
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write('mode_auto\n')
+    except Exception as e:
+        print(f"[logout] Error: {e}")
     request.session.flush()
     return redirect('login')
 
