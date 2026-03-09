@@ -41,9 +41,9 @@ function drawTable(){
     table.position.set(0, 205, 500);
     window.scene.add(table);
 
-    var legPositions = [[-285,40,215],[285,40,215],[-285,40,785],[285,40,785]];
+    var legPositions = [[-280,40,220],[280,40,220],[-280,40,780],[280,40,780]];
     legPositions.forEach(pos => {
-        var leg = new THREE.Mesh(new THREE.BoxGeometry(30, 300, 30), material);
+        var leg = new THREE.Mesh(new THREE.BoxGeometry(40, 300, 40), material);
         leg.position.set(...pos);
         window.scene.add(leg);
     });
@@ -74,10 +74,10 @@ function drawfloor(){
 //serre draw
 function drawSerreFloor(){
     var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(100, 20, 100),
-        new THREE.MeshPhongMaterial({ color: 0xAAAAAA })
+        new THREE.BoxGeometry(380, 10, 200),
+        new THREE.MeshPhongMaterial({ color: 0xB68E65 })
     );
-    floor.position.set(0, 230, 350);
+    floor.position.set(0, 222.5, 350);
     window.scene.add(floor);
 }
 
