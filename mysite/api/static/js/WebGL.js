@@ -71,7 +71,8 @@ function drawfloor(){
 }
 
 function init() {
-    var canvasWidth = 846;
+    var container = document.querySelector('.container');
+    var canvasWidth = container.offsetWidth;
     var canvasHeight = 494;
     var canvasRatio = canvasWidth / canvasHeight;
 
