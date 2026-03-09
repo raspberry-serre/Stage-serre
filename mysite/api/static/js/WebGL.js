@@ -29,6 +29,7 @@ function fillScene() {
     drawTable();
     drawWall();
     drawfloor();
+    drawSerreFloor();
 }
 
 function drawTable(){
@@ -70,6 +71,16 @@ function drawfloor(){
     window.scene.add(floor);
 }
 
+//serre draw
+function drawSerreFloor(){
+    var floor = new THREE.Mesh(
+        new THREE.BoxGeometry(100, 20, 100),
+        new THREE.MeshPhongMaterial({ color: 0xAAAAAA })
+    );
+    floor.position.set(0, 230, 350);
+    window.scene.add(floor);
+}
+
 function init() {
     var container = document.querySelector('.container');
     var canvasWidth = container.offsetWidth;
@@ -87,7 +98,7 @@ function init() {
 
 // Lock camera 
     cameraControls.enablePan = false;
-    cameraControls.maxPolarAngle = Math.PI / 2.4;
+    cameraControls.maxPolarAngle = Math.PI / 2;
     cameraControls.minPolarAngle = Math.PI / 4;
     cameraControls.minAzimuthAngle = -0.5;
     cameraControls.maxAzimuthAngle = 0.5;
