@@ -3,12 +3,14 @@ import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
 import { OBJLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/OBJLoader.js';
 import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 
+
 var camera, renderer;
 var ground = true;
 
 window.scene = new THREE.Scene();
 var cameraControls;
 var clock = new THREE.Clock();
+var toitMovible = null; 
 
 function fillScene() {
     var light = new THREE.DirectionalLight( 0xFFFFFF, 0.9 );
@@ -33,6 +35,7 @@ function fillScene() {
     drawSerreWalls();
     drawSupportToit();
     drawToitFix();
+    drawToitMovible();
 }
 
 function drawTable(){
@@ -161,6 +164,31 @@ function drawToitFix(){
     
 }
 
+function drawToitMovible() {
+    var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.1,
+        shininess: 100,
+        specular: 0xffffff,
+        side: THREE.DoubleSide
+    });
+
+    var geometry = new THREE.BoxGeometry(5, 210, 200);
+    var toit = new THREE.Mesh(geometry, material);
+
+    // offset the mesh so the pivot is at the edge instead of center
+    toit.position.set(0, -105, 0); // move mesh down by half its height
+
+    // create a pivot object at the desired rotation point
+    toitMovible = new THREE.Object3D();
+    toitMovible.position.set(190, 400, 350); // set pivot position
+    toitMovible.rotation.z = Math.PI / 2.6;
+    toitMovible.add(toit);
+
+    window.scene.add(toitMovible);
+}
+
 function init() {
     var container = document.querySelector('.container');
     var canvasWidth = container.offsetWidth;
@@ -200,13 +228,24 @@ function animate() {
     window.requestAnimationFrame(animate);
     render();
 }
+var toitOpening = true;
 
 function render() {
     var delta = clock.getDelta();
     cameraControls.update(delta);
+
+    if (toitMovible) {
+        if (toitOpening) {
+            toitMovible.rotation.z -= 0.001;
+            if (toitMovible.rotation.z <= -2.2) toitOpening = false;
+        } else {
+            toitMovible.rotation.z += 0.001;
+            if (toitMovible.rotation.z >= -1.945) toitOpening = true;
+        }
+    }
+
     renderer.render(window.scene, camera);
 }
-
 try {
     init();
     fillScene();
