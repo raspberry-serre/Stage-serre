@@ -10,7 +10,7 @@ window.scene = new THREE.Scene();
 var cameraControls;
 var clock = new THREE.Clock();
 var toitMovible = null;
-var potPosition = { x: 100, y: 245, z: 350 };
+var potPosition = { x: 100, y: 260, z: 350 };
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 0.9);
@@ -38,6 +38,8 @@ function fillScene() {
     drawToitMovible();
     drawLED();
     drawPot();
+    drawPlantStem();
+    drawPlantFlower();
 }
 
 function drawTable() {
@@ -198,13 +200,37 @@ function drawLED() {
 }
 
 function drawPot() {
-    var material = new THREE.MeshPhongMaterial({ color: 0x00FF00 }); // replace with: { map: PotTexture }
-    var pot = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 40, 32), material);
+    var sideMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
+    var topMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); 
+    var bottomMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
+
+    var pot = new THREE.Mesh(
+        new THREE.CylinderGeometry(40, 30, 70, 32),
+        [sideMaterial, topMaterial, bottomMaterial] 
+    );
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
     // pot.castShadow = true; // shadow_code
     // pot.receiveShadow = true; // shadow_code
     window.scene.add(pot);
 }
+
+function drawPlantStem() {
+    var material = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+    var plant = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 80, 32), material);
+    plant.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
+    // plant.castShadow = true; // shadow_code
+    // plant.receiveShadow = true; // shadow_code
+    window.scene.add(plant);
+}
+
+function drawPlantFlower() {
+    var material = new THREE.MeshPhongMaterial({ color: 0xFF69B4 });
+    var flower = new THREE.Mesh(new THREE.SphereGeometry(15, 32, 32), material);
+    flower.position.set(potPosition.x, potPosition.y + 110, potPosition.z);
+    // flower.castShadow = true; // shadow_code
+    // flower.receiveShadow = true; // shadow_code
+    window.scene.add(flower);
+}   
 
 function init() {
     var container = document.querySelector('.container');
@@ -273,7 +299,7 @@ ledLightPosition.forEach(pos => {
     // light.castShadow = true; // shadow_code
 
     var ledTarget = new THREE.Object3D();
-    ledTarget.position.set(potPosition.x, potPosition.y, potPosition.z);
+    ledTarget.position.set(potPosition.x, potPosition.y+50, potPosition.z);
     window.scene.add(ledTarget);
     light.target = ledTarget;
 
