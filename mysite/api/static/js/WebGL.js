@@ -13,7 +13,7 @@ var toitMovible = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 
 function fillScene() {
-    var light = new THREE.DirectionalLight(0xFFFFFF, 0.9);
+    var light = new THREE.DirectionalLight(0xFFFFFF, 2);
     light.position.set(-1300, 700, 1240);
     window.scene.add(light);
 
