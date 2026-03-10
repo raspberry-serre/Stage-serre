@@ -260,8 +260,8 @@ window.setToitAngle = function(servoAngle) {
 var ledLights = [];
 
 var ledLightPosition = [
-    { x: -100, y: 430, z: 310 }, { x: -130, y: 420, z: 310 }, { x: -70, y: 442, z: 310 },
-    { x: -100, y: 430, z: 390 }, { x: -70, y: 442, z: 390 }, { x: -130, y: 420, z: 390 }
+    { x: -100, y: 430, z: 310 },
+    { x: -100, y: 430, z: 390 }
 ];
 
 ledLightPosition.forEach(pos => {
