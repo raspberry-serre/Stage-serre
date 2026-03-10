@@ -31,6 +31,7 @@ function fillScene() {
     drawfloor();
     drawSerreFloor();
     drawSerreWalls();
+    drawSupportToit();
 }
 
 function drawTable(){
@@ -88,7 +89,7 @@ function drawSerreWalls(){
     var material = new THREE.MeshPhongMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.2,
+        opacity: 0.1,
         shininess: 100,
         specular: 0xffffff,
         side: THREE.DoubleSide
@@ -102,12 +103,42 @@ function drawSerreWalls(){
     });
 
         var sideWallsPositions = [[185, 313.5, 350], [-185, 313.5, 350]];
-    sideWallsPositions.forEach(pos => {
+        sideWallsPositions.forEach(pos => {
         var sideWall = new THREE.Mesh(new THREE.BoxGeometry(10, 172, 200), material);
         sideWall.position.set(...pos);
         window.scene.add(sideWall);
     });
 
+}
+
+function drawSupportToit() {
+    var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.1,
+        shininess: 100,
+        specular: 0xffffff,
+        side: THREE.DoubleSide
+    });
+
+    var supportToitPositions = [[0, 400, 350], [0, 400, 550]];
+    supportToitPositions.forEach(pos => {
+        var geometry = new THREE.BufferGeometry();
+        var vertices = new Float32Array([
+            -190, 0, -100,
+             190, 0, -100,
+             0, 100, -100,
+
+        ]);
+        var indices = [0, 1, 2];
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
+
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...pos);
+        window.scene.add(mesh);
+    });
 }
 
 function init() {
