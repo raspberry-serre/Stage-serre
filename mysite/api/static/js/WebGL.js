@@ -36,6 +36,7 @@ function fillScene() {
     drawSupportToit();
     drawToitFix();
     drawToitMovible();
+    drawLED();
 }
 
 function drawTable(){
@@ -187,6 +188,18 @@ function drawToitMovible() {
     toitMovible.add(toit);
 
     window.scene.add(toitMovible);
+}
+
+function drawLED(){
+    var material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+    var ledPosition = [[-100, 430, 310], [-100, 430, 390]];
+    ledPosition.forEach(pos => {
+        var led = new THREE.Mesh(new THREE.BoxGeometry(2, 100, 15), material);
+        led.position.set(...pos);
+        led.rotation.z = -(Math.PI / 2.6);
+        window.scene.add(led);
+    });
+
 }
 
 function init() {
