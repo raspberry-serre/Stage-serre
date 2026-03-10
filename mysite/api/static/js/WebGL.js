@@ -228,20 +228,22 @@ function animate() {
     window.requestAnimationFrame(animate);
     render();
 }
-var toitOpening = true;
+var toitTargetAngle = Math.PI / 2.6;
+
+window.setToitAngle = function(servoAngle) {
+    if (servoAngle >= 180) {
+        toitTargetAngle = -2.2;
+    } else {
+        toitTargetAngle = Math.PI / 2.6;
+    }
+};
 
 function render() {
     var delta = clock.getDelta();
     cameraControls.update(delta);
 
     if (toitMovible) {
-        if (toitOpening) {
-            toitMovible.rotation.z -= 0.001;
-            if (toitMovible.rotation.z <= -2.2) toitOpening = false;
-        } else {
-            toitMovible.rotation.z += 0.001;
-            if (toitMovible.rotation.z >= -1.945) toitOpening = true;
-        }
+        toitMovible.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.05;
     }
 
     renderer.render(window.scene, camera);

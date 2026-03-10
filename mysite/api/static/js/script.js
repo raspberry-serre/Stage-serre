@@ -25,6 +25,7 @@ async function refreshData() {
         updateCard('solCard', lastData.sol, '%');
         updateCard('lumiereCard', lastData.lumière, 'Lux');
         updateCard('servoCard', lastData.servo, '°');
+        if (window.setToitAngle) window.setToitAngle(lastData.servo);
         updateCard('periodeCard', lastData.periode, '');
         updateCard('pompeCard', lastData.pompe, '');
         updateCard('ledCard', lastData.led, '');
