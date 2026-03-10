@@ -38,6 +38,7 @@ function fillScene() {
     drawPot();
     drawPlantStem();
     drawPlantFlower();
+    drawPump();
 }
 
 function drawTable() {
@@ -229,6 +230,13 @@ function drawPlantFlower() {
     // flower.receiveShadow = true; // shadow_code
     window.scene.add(flower);
 }   
+
+function drawPump() {
+    var material = new THREE.MeshPhongMaterial({ color: 0x0000FF });
+    var pump = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 30), material);
+    pump.position.set(50, 242, 420);
+    window.scene.add(pump);
+}
 
 function init() {
     var container = document.querySelector('.container');
