@@ -11,7 +11,7 @@ CMD_FILE = '/tmp/serre_cmds.txt'
 
 TOIT_CLOSED_ANGLE = 110
 TOIT_OPEN_ANGLE = 180
-SESSION_TIMEOUT = 600
+SESSION_TIMEOUT = 3600
 
 CMD_MAP = {
     'led_on':  'led_1',
@@ -103,6 +103,7 @@ def index(request):
     return render(request, "index.html", {
         'toit': 1 if toit_ouvert else 0,
         'led': 1 if led_state else 0,
+        'login_time': int(request.session.get('login_time', 0)),
     })
 
 
@@ -213,6 +214,7 @@ def led_cmd(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+
 @api_view(['POST'])
 def pompe_cmd(request):
     action = request.data.get('action')
@@ -257,6 +259,11 @@ def auto_manuel(request):
 
 def logout(request):
     log(request.session.get('username'), 'logged out')
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write('mode_auto\n')
+    except Exception as e:
+        print(f"[logout] Error: {e}")
     request.session.flush()
     return redirect('login')
 

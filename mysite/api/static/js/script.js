@@ -25,14 +25,18 @@ async function refreshData() {
         updateCard('solCard', lastData.sol, '%');
         updateCard('lumiereCard', lastData.lumière, 'Lux');
         updateCard('servoCard', lastData.servo, '°');
+        if (window.setToitAngle) window.setToitAngle(lastData.servo);
         updateCard('periodeCard', lastData.periode, '');
         updateCard('pompeCard', lastData.pompe, '');
+        if (window.setPompeState) window.setPompeState(lastData.pompe);
         updateCard('ledCard', lastData.led, '');
+        if (window.setLedIntensity) window.setLedIntensity(lastData.led);
         if (lastData.pompe_lock == 0 || lastData.pompe_lock == 600) {
             updateCard('lockCard', 'Not Locked');
         } else {
-            updateCard('lockCard', 'Locked : ', lastData.pompe_lock, 's');
+            updateCard('lockCard', 'Locked : ' + lastData.pompe_lock + 's');
         }
+        if (window.setPompeLock) window.setPompeLock(lastData.pompe_lock);
 
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {
@@ -318,14 +322,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
+    // Auto-disconnect based on server login time
+    if (typeof LOGIN_TIME !== 'undefined') {
+        const elapsed = (Date.now() / 1000) - LOGIN_TIME;
+        const remaining = (SESSION_TIMEOUT - elapsed) * 1000;
+        if (remaining > 0) {
+            setTimeout(function() {
+                window.location.href = '/';
+            }, remaining);
+        } else {
+            window.location.href = '/';
+        }
+    }
 });
 
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden && autoRefreshEnabled && window.location.pathname !== '/logs/') refreshData();
 });
-
-// Auto-redirect to login after session timeout (no logout log)
-setTimeout(function() {
-    window.location.href = '/';
-}, 10 * 60 * 1000);
