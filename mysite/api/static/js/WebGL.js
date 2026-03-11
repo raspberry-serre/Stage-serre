@@ -233,9 +233,17 @@ function drawPlantFlower() {
 
 function drawPump() {
     var material = new THREE.MeshPhongMaterial({ color: 0x0000FF });
-    var pump = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 30), material);
+    var pump = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 30, 32), material);
     pump.position.set(50, 242, 420);
     window.scene.add(pump);
+
+    var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), new THREE.MeshPhongMaterial({ color: 0xFF0000 }));
+    pumpLed.position.set(60, 257, 420);
+    window.scene.add(pumpLed);
+
+    var pumpTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), new THREE.MeshPhongMaterial({ color: 0xFF0000 }));
+    pumpTop.position.set(60, 262, 420);
+    window.scene.add(pumpTop);
 }
 
 function init() {
