@@ -12,14 +12,12 @@ var clock = new THREE.Clock();
 var toitMovible = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
-var pumpLockOpacity = 0;
+var lockMaterial = null;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
     light.position.set(-1300, 700, 1240);
     window.scene.add(light);
-
-
 
     // var cubeLoader = new THREE.CubeTextureLoader().setPath('assets/skybox/');
     // cubeLoader.load(
@@ -203,12 +201,12 @@ function drawLED() {
 
 function drawPot() {
     var sideMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
-    var topMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); 
+    var topMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
     var bottomMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
 
     var pot = new THREE.Mesh(
         new THREE.CylinderGeometry(40, 30, 70, 32),
-        [sideMaterial, topMaterial, bottomMaterial] 
+        [sideMaterial, topMaterial, bottomMaterial]
     );
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
     // pot.castShadow = true; // shadow_code
@@ -232,7 +230,7 @@ function drawPlantFlower() {
     // flower.castShadow = true; // shadow_code
     // flower.receiveShadow = true; // shadow_code
     window.scene.add(flower);
-}   
+}
 
 function drawPump() {
     var material = new THREE.MeshPhongMaterial({ color: 0x0000FF });
@@ -251,11 +249,10 @@ function drawPump() {
 
 function drawPumpLock() {
     var Textureloader = new THREE.TextureLoader();
-var lockTexture = Textureloader.load('/static/js/texture/lock.png');
-    var material = new THREE.MeshPhongMaterial({ map: lockTexture, transparent: true });
-    var lock = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 0.1), material);
+    var lockTexture = Textureloader.load('/static/js/texture/lock.png');
+    lockMaterial = new THREE.MeshBasicMaterial({ map: lockTexture, transparent: true, opacity: 0 });
+    var lock = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 0.1), lockMaterial);
     lock.position.set(50, 242, 437);
-    lock.material.opacity = pumpLockOpacity;
     window.scene.add(lock);
 }
 
@@ -303,11 +300,7 @@ function animate() {
 var toitTargetAngle = -1.95;
 
 window.setToitAngle = function(servoAngle) {
-    if (servoAngle >= 180) {
-        toitTargetAngle = -2.2;
-    } else {
-        toitTargetAngle = -1.95;
-    }
+    toitTargetAngle = servoAngle >= 180 ? -2.2 : -1.95;
 };
 
 var ledLights = [];
@@ -326,7 +319,7 @@ ledLightPosition.forEach(pos => {
     // light.castShadow = true; // shadow_code
 
     var ledTarget = new THREE.Object3D();
-    ledTarget.position.set(potPosition.x, potPosition.y+70, potPosition.z);
+    ledTarget.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
     window.scene.add(ledTarget);
     light.target = ledTarget;
 
@@ -341,19 +334,17 @@ window.setLedIntensity = function(ledState) {
 
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
-}
-
-window.setPompeLock = function(lockTime) {
-
-    if (lockTime == 0 || lockTime == 600) {
-        pumpLockOpacity = 0;
-    } else {
-        pumpLedMaterial.color.set(0xFF0000);
-        pumpLockOpacity = 1;
-    }
-
 };
 
+window.setPompeLock = function(lockTime) {
+    if (lockMaterial) {
+        if (lockTime == 0 || lockTime == 600) {
+            lockMaterial.opacity = 0;
+        } else {
+            lockMaterial.opacity = 1;
+        }
+    }
+};
 
 function render() {
     var delta = clock.getDelta();
