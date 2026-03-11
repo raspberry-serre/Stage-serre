@@ -12,6 +12,7 @@ var clock = new THREE.Clock();
 var toitMovible = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+var pumpLockOpacity = 0;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -40,6 +41,7 @@ function fillScene() {
     drawPlantStem();
     drawPlantFlower();
     drawPump();
+    drawPumpLock();
 }
 
 function drawTable() {
@@ -247,6 +249,16 @@ function drawPump() {
     window.scene.add(pumpTop);
 }
 
+function drawPumpLock() {
+    var Textureloader = new THREE.TextureLoader();
+var lockTexture = Textureloader.load('/static/js/texture/lock.png');
+    var material = new THREE.MeshPhongMaterial({ map: lockTexture, transparent: true });
+    var lock = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 0.1), material);
+    lock.position.set(50, 242, 437);
+    lock.material.opacity = pumpLockOpacity;
+    window.scene.add(lock);
+}
+
 function init() {
     var container = document.querySelector('.container');
     var canvasWidth = container.offsetWidth;
@@ -330,6 +342,18 @@ window.setLedIntensity = function(ledState) {
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
 }
+
+window.setPompeLock = function(lockTime) {
+
+    if (lockTime == 0 || lockTime == 600) {
+        pumpLockOpacity = 0;
+    } else {
+        pumpLedMaterial.color.set(0xFF0000);
+        pumpLockOpacity = 1;
+    }
+
+};
+
 
 function render() {
     var delta = clock.getDelta();

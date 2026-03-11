@@ -36,6 +36,7 @@ async function refreshData() {
         } else {
             updateCard('lockCard', 'Locked : ' + lastData.pompe_lock + 's');
         }
+        if (window.setPompeLock) window.setPompeLock(lastData.pompe_lock);
 
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {
