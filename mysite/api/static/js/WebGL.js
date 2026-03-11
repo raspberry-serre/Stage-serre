@@ -31,6 +31,7 @@ function fillScene() {
     drawfloor();
     drawSerreFloor();
     drawSerreWalls();
+    drawPillars();
     drawSupportToit();
     drawToitFix();
     drawToitMovible();
@@ -118,6 +119,20 @@ function drawSerreWalls() {
         window.scene.add(sideWall);
     });
 }
+
+function drawPillars() {
+    var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+    });
+
+    var pillarPositions = [[-188, 313.5, 252], [188, 313.5, 252], [-188, 313.5, 448], [188, 313.5, 448]];
+    pillarPositions.forEach(pos => {
+        var pillar = new THREE.Mesh(new THREE.BoxGeometry(20, 171, 20), material);
+        pillar.position.set(...pos);
+        window.scene.add(pillar);
+    });
+}
+
 
 function drawSupportToit() {
     var material = new THREE.MeshPhongMaterial({
