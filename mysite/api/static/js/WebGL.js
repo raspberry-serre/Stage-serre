@@ -43,9 +43,9 @@ function fillScene() {
 }
 
 function drawTable() {
-    // var Textureloader = new THREE.TextureLoader();
-    // var TableTexture = Textureloader.load('./assets/wood.jpg');
-    var material = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // replace with: { map: TableTexture }
+    var Textureloader = new THREE.TextureLoader();
+    var TableTexture = Textureloader.load('/static/js/texture/bois.jpg');
+    var material = new THREE.MeshPhongMaterial({ map: TableTexture });
 
     var table = new THREE.Mesh(new THREE.BoxGeometry(600, 30, 600), material);
     table.position.set(0, 205, 500);
@@ -62,11 +62,11 @@ function drawTable() {
 }
 
 function drawWall() {
-    // var Textureloader = new THREE.TextureLoader();
-    // var WallTexture = Textureloader.load('./assets/Wall.png');
+    var Textureloader = new THREE.TextureLoader();
+    var WallTexture = Textureloader.load('/static/js/texture/Wall.png');
     var wall = new THREE.Mesh(
         new THREE.BoxGeometry(2000, 1500, 50),
-        new THREE.MeshPhongMaterial({ color: 0xCCCCCC }) // replace with: { map: WallTexture }
+        new THREE.MeshPhongMaterial({ map: WallTexture }) // replace with: { map: WallTexture }
     );
     wall.position.set(0, 640, 150);
     // wall.receiveShadow = true; // shadow_code
