@@ -6,6 +6,7 @@ from .serializers import SerreSerializer
 from datetime import datetime
 from django.contrib.auth.hashers import check_password, make_password
 from .management.commands.logs import log
+import re
 
 CMD_FILE = '/tmp/serre_cmds.txt'
 
@@ -268,6 +269,8 @@ def logout(request):
     return redirect('login')
 
 
+import re
+
 def new_account(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -278,6 +281,22 @@ def new_account(request):
 
         if Usr.objects.filter(username=username).exists():
             return render(request, "new_account.html", {'error': 'Username already exists'})
+
+        # Password validation
+        errors = []
+        if len(raw_password) < 8:
+            errors.append('at least 8 characters')
+        if not re.search(r'[a-z]', raw_password):
+            errors.append('at least one lowercase letter')
+        if not re.search(r'[A-Z]', raw_password):
+            errors.append('at least one uppercase letter')
+        if not re.search(r'[0-9]', raw_password):
+            errors.append('at least one number')
+        if not re.search(r'[^a-zA-Z0-9]', raw_password):
+            errors.append('at least one special character')
+
+        if errors:
+            return render(request, "new_account.html", {'error': 'Password must contain ' + ', '.join(errors)})
 
         Usr.objects.create(username=username, password=make_password(raw_password))
         log(username, 'account created')

@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from api.models import Usr
 from api.serializers import UsrSerializer
 from django.contrib.auth.hashers import make_password
+import re
 
 
 class Command(BaseCommand):
@@ -14,7 +15,7 @@ class Command(BaseCommand):
             help='action to perform on Usr model',
         )
         parser.add_argument('--username', '-u', help='username for create')
-        parser.add_argument('--password', '-p', help='password for create')
+        parser.add_argument('--password', '-pw', help='password for create')
 
     def handle(self, *args, **options):
         action = options['action']
@@ -35,9 +36,28 @@ class Command(BaseCommand):
             if not username or not password:
                 self.stdout.write(self.style.ERROR('username and password required'))
                 return
-            password_hash = make_password(password)
-            if UsrSerializer.is_valid():
-                usr = UsrSerializer.save()
+
+            errors = []
+            if len(password) < 8:
+                errors.append('at least 8 characters')
+            if not re.search(r'[a-z]', password):
+                errors.append('at least one lowercase letter')
+            if not re.search(r'[A-Z]', password):
+                errors.append('at least one uppercase letter')
+            if not re.search(r'[^a-zA-Z0-9]', password):
+                errors.append('at least one special character')
+
+            if errors:
+                self.stdout.write(self.style.ERROR('Password must contain: ' + ', '.join(errors)))
+                return
+
+            serializer = UsrSerializer(data={
+                'username': username,
+                'password': make_password(password)
+            })
+
+            if serializer.is_valid():
+                usr = serializer.save()
                 self.stdout.write(self.style.SUCCESS(f"created user {usr.username} (id {usr.id})"))
             else:
-                self.stdout.write(self.style.ERROR(str(UsrSerializer.errors)))
+                self.stdout.write(self.style.ERROR(str(serializer.errors)))
