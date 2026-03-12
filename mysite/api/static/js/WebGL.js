@@ -16,6 +16,7 @@ var lockMaterial = null;
 var waterlevel = 20;
 var waterMesh = null;
 var tankBottom = 225;
+var waterTube = 0;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -353,7 +354,7 @@ function drawPipe() {
     var innerMaterial = new THREE.MeshPhongMaterial({
         color: 0x0000FF,  // ← change this color
         transparent: true,
-        opacity: 0.8,
+        opacity: waterTube,
         polygonOffset: true,
         polygonOffsetFactor: -1,
         polygonOffsetUnits: -1,
@@ -400,7 +401,7 @@ function drawPipe() {
     var innerMaterial1 = new THREE.MeshPhongMaterial({
         color: 0x0000FF,  // ← change this color
         transparent: true,
-        opacity: 0.8,
+        opacity: waterTube,
     });
     var innerPipe1 = new THREE.Mesh(innerGeometry1, innerMaterial1);
     innerPipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
@@ -505,6 +506,9 @@ window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
     if (pompeState === 'ON') {
         waterlevel = Math.max(0, waterlevel - 5);  // ✅ never goes below 0
+        waterTube = 0.8;  // ✅ make tube visible when pump is on
+    }else {
+        waterTube = 0;  // ✅ hide tube when pump is off
     }
 };
 
