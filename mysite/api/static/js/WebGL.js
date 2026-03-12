@@ -13,6 +13,7 @@ var toitMovible = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
+var waterlevel = 20;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -41,6 +42,8 @@ function fillScene() {
     drawPump();
     drawPumpLock();
     drawPipe();
+    drawWaterTank();
+    drawWater();
 }
 
 function drawTable() {
@@ -368,6 +371,27 @@ function drawPipe() {
 
 }
 
+function drawWaterTank() {
+    var material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false });
+    var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), material);
+    tank.position.set(162, 240, 420);
+    window.scene.add(tank);
+}
+
+function drawWater() {
+    var tankBottom = 231; // tank center (240) minus half tank height (30/2)
+
+    var material = new THREE.MeshPhongMaterial({ 
+        color: 0x0000FF, 
+        transparent: true, 
+        opacity: 0.5, 
+        depthWrite: false 
+    });
+    var water = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
+    water.position.set(162, tankBottom + waterlevel / 2, 420); // ✅ bottom stays fixed
+    window.scene.add(water);
+}
+
 function init() {
     var container = document.querySelector('.container');
     var canvasWidth = container.offsetWidth;
@@ -446,6 +470,9 @@ window.setLedIntensity = function(ledState) {
 
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
+    while (pompeState === 'ON') {
+        waterlevel = waterlevel-0.1
+    }
 };
 
 window.setPompeLock = function(lockTime) {
