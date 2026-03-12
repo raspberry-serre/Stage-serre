@@ -14,6 +14,8 @@ var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
 var waterlevel = 20;
+var waterMesh = null;
+var tankBottom = 225;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -138,7 +140,6 @@ function drawPillars() {
         window.scene.add(pillar);
     });
 }
-
 
 function drawSupportToit() {
     var material = new THREE.MeshPhongMaterial({
@@ -285,8 +286,6 @@ function drawPlant() {
         leaf.scale.set(500, 1, 1); 
         window.scene.add(leaf);
     });
-
-
 }
 
 function drawPump() {
@@ -368,7 +367,6 @@ function drawPipe() {
     });
     var pipe1 = new THREE.Mesh(geometry1, material1);
     window.scene.add(pipe1);
-
 }
 
 function drawWaterTank() {
@@ -379,17 +377,15 @@ function drawWaterTank() {
 }
 
 function drawWater() {
-    var tankBottom = 231; // tank center (240) minus half tank height (30/2)
-
     var material = new THREE.MeshPhongMaterial({ 
         color: 0x0000FF, 
         transparent: true, 
         opacity: 0.5, 
         depthWrite: false 
     });
-    var water = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
-    water.position.set(162, tankBottom + waterlevel / 2, 420); // ✅ bottom stays fixed
-    window.scene.add(water);
+    waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
+    waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
+    window.scene.add(waterMesh);
 }
 
 function init() {
@@ -416,7 +412,6 @@ function init() {
     cameraControls.maxAzimuthAngle = 0.5;
     cameraControls.minDistance = 500;
     cameraControls.maxDistance = 2000;
-    
 }
 
 function addToDOM() {
@@ -471,7 +466,7 @@ window.setLedIntensity = function(ledState) {
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
     if (pompeState === 'ON') {
-        waterlevel = waterlevel-5
+        waterlevel = Math.max(0, waterlevel - 5);  // ✅ never goes below 0
     }
 };
 
@@ -491,6 +486,11 @@ function render() {
 
     if (toitMovible) {
         toitMovible.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.05;
+    }
+
+    if (waterMesh) {
+        waterMesh.scale.y = waterlevel / 20;
+        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20);
     }
 
     renderer.render(window.scene, camera);
