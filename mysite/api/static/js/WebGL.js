@@ -17,6 +17,8 @@ var waterlevel = 22;
 var waterMesh = null;
 var tankBottom = 225;
 var waterTube = 0;
+var innerPipeMaterial = null;
+var innerPipeMaterial1 = null;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -314,22 +316,15 @@ function drawPumpLock() {
 }
 
 function drawPipe() {
-    // Define the points the pipe curves through
     var curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(50, 232, 420),   // start (at the pump)
-        new THREE.Vector3(0, 242, 400),   // curve point
-        new THREE.Vector3(  0, 242, 350),   // curve point
-        new THREE.Vector3(50, 295, 350),   // curve point
-        new THREE.Vector3(85, 300, 350),  // end (at the pot)
+        new THREE.Vector3(50, 232, 420),
+        new THREE.Vector3(0, 242, 400),
+        new THREE.Vector3(0, 242, 350),
+        new THREE.Vector3(50, 295, 350),
+        new THREE.Vector3(85, 300, 350),
     ]);
 
-    var geometry = new THREE.TubeGeometry(
-        curve,   // the curve to follow
-        20,      // number of segments (more = smoother)
-        3,       // pipe radius
-        8,       // pipe roundness (sides)
-        false    // closed tube?
-    );
+    var geometry = new THREE.TubeGeometry(curve,20,3,8,false);
 
     var material = new THREE.MeshPhongMaterial({         
         color: 0x000000,
@@ -343,40 +338,29 @@ function drawPipe() {
     var pipe = new THREE.Mesh(geometry, material);
     window.scene.add(pipe);
 
-    // inner tube for pipe
-    var innerGeometry = new THREE.TubeGeometry(
-        curve,   // same curve
-        20,      // number of segments (more = smoother)
-        1,       // smaller radius than outer pipe (3)
-        8,       // pipe roundness (sides)
-        false    // closed tube?
-    );
-    var innerMaterial = new THREE.MeshPhongMaterial({
-        color: 0x0000FF,  // ← change this color
+    var innerGeometry = new THREE.TubeGeometry(curve,20,1,8,false);
+
+    innerPipeMaterial = new THREE.MeshPhongMaterial({
+        color: 0x0000FF,
         transparent: true,
         opacity: waterTube,
         polygonOffset: true,
         polygonOffsetFactor: -1,
         polygonOffsetUnits: -1,
     });
-    var innerPipe = new THREE.Mesh(innerGeometry, innerMaterial);
+
+    var innerPipe = new THREE.Mesh(innerGeometry, innerPipeMaterial);
     window.scene.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(60, 252, 420),   // start (at the pump)
-        new THREE.Vector3(100, 257, 420),   // curve point
-        new THREE.Vector3(150, 262, 420),   // curve point
-        new THREE.Vector3(160, 262, 420),   // curve point
-        new THREE.Vector3(162, 240, 420),  // end (at the pot)
+        new THREE.Vector3(60, 252, 420),
+        new THREE.Vector3(100, 257, 420),
+        new THREE.Vector3(150, 262, 420),
+        new THREE.Vector3(160, 262, 420),
+        new THREE.Vector3(162, 240, 420),
     ]);
 
-    var geometry1 = new THREE.TubeGeometry(
-        curve1,   // the curve to follow
-        50,      // number of segments (more = smoother)
-        3,       // pipe radius
-        8,       // pipe roundness (sides)
-        false    // closed tube?
-    );
+    var geometry1 = new THREE.TubeGeometry(curve1,50,3,8,false);
 
     var material1 = new THREE.MeshPhongMaterial({         
         color: 0x000000,
@@ -390,20 +374,15 @@ function drawPipe() {
     pipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(pipe1);
 
-    // inner tube for pipe1
-    var innerGeometry1 = new THREE.TubeGeometry(
-        curve1,  // same curve
-        50,      // number of segments (more = smoother)
-        1,       // smaller radius than outer pipe (3)
-        8,       // pipe roundness (sides)
-        false    // closed tube?
-    );
-    var innerMaterial1 = new THREE.MeshPhongMaterial({
-        color: 0x0000FF,  // ← change this color
+    var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1,8,false);
+
+    innerPipeMaterial1 = new THREE.MeshPhongMaterial({
+        color: 0x0000FF,
         transparent: true,
         opacity: waterTube,
     });
-    var innerPipe1 = new THREE.Mesh(innerGeometry1, innerMaterial1);
+
+    var innerPipe1 = new THREE.Mesh(innerGeometry1, innerPipeMaterial1);
     innerPipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(innerPipe1);
 }
@@ -443,7 +422,6 @@ function init() {
     camera.position.set(0, 300, 1500);
     cameraControls.target.set(0, 43, -8);
 
-    // Lock camera
     cameraControls.enablePan = false;
     cameraControls.maxPolarAngle = Math.PI / 2.3;
     cameraControls.minPolarAngle = Math.PI / 4;
@@ -533,6 +511,14 @@ function render() {
     if (waterMesh) {
         waterMesh.scale.y = waterlevel / 20;
         waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20);
+    }
+
+    if (innerPipeMaterial) {
+        innerPipeMaterial.opacity = waterTube;
+    }
+
+    if (innerPipeMaterial1) {
+        innerPipeMaterial1.opacity = waterTube;
     }
 
     renderer.render(window.scene, camera);
