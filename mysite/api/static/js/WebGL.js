@@ -13,7 +13,7 @@ var toitMovible = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
-var waterlevel = 20;
+var waterlevel = 22;
 var waterMesh = null;
 var tankBottom = 225;
 var waterTube = 0;
@@ -445,7 +445,7 @@ function init() {
 
     // Lock camera
     cameraControls.enablePan = false;
-    cameraControls.maxPolarAngle = Math.PI / 2.5;
+    cameraControls.maxPolarAngle = Math.PI / 2.3;
     cameraControls.minPolarAngle = Math.PI / 4;
     cameraControls.minAzimuthAngle = -0.2;
     cameraControls.maxAzimuthAngle = 0.2;
@@ -505,7 +505,7 @@ window.setLedIntensity = function(ledState) {
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
     if (pompeState === 'ON') {
-        waterlevel = Math.max(0, waterlevel - 5);  // ✅ never goes below 0
+        waterlevel = Math.max(0, waterlevel - 0.5);  // ✅ never goes below 0
         waterTube = 0.8;  // ✅ make tube visible when pump is on
     }else {
         waterTube = 0;  // ✅ hide tube when pump is off
