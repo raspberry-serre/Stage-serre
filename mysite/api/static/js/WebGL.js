@@ -408,8 +408,8 @@ function init() {
     cameraControls.enablePan = false;
     cameraControls.maxPolarAngle = Math.PI / 2;
     cameraControls.minPolarAngle = Math.PI / 4;
-    cameraControls.minAzimuthAngle = -0.5;
-    cameraControls.maxAzimuthAngle = 0.5;
+    cameraControls.minAzimuthAngle = -0.2;
+    cameraControls.maxAzimuthAngle = 0.2;
     cameraControls.minDistance = 500;
     cameraControls.maxDistance = 2000;
 }
