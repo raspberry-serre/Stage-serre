@@ -56,15 +56,12 @@ function fillScene() {
     drawPillars();
     drawSupportToit();
     drawToitFix();
-    drawToitMovible();
     drawLED();
     drawPot();
     drawPlant();
     drawPump();
-    drawPumpLock();
     drawPipe();
     drawWaterTank();
-    drawWater();
     drawWaterDrops();
     drawLCD();
 }
