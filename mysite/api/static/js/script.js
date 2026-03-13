@@ -21,6 +21,7 @@ async function refreshData() {
         const lastData = await lastResponse.json();
 
         updateCard('tempCard', lastData.temp.toFixed(1), '°C');
+        if (window.setTemp) window.setTemp(lastData.temp);
         updateCard('humCard', lastData.hum.toFixed(1), '%');
         updateCard('solCard', lastData.sol, '%');
         updateCard('lumiereCard', lastData.lumière, 'Lux');

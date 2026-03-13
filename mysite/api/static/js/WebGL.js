@@ -19,11 +19,11 @@ var tankBottom = 225;
 var waterTube = 0;
 var innerPipeMaterial = null;
 var innerPipeMaterial1 = null;
-
-/* -------- DROP SYSTEM (OPTIMIZED) -------- */
 const DROP_COUNT = 30;
 var dropMesh = null;
 var dropData = [];
+var temp = 0;
+
 
 var dropOrigin = new THREE.Vector3(85, 300, 350);
 var gravity = -0.15;
@@ -484,7 +484,7 @@ function drawLCD(){
     lcdCtx.fillRect(0, 0, 356, 64);
     lcdCtx.fillStyle = '#000000';
     lcdCtx.font = 'bold 20px monospace';
-    lcdCtx.fillText('Temp:25.3C', 10, 25);
+    lcdCtx.fillText('Temp:'+temp+'C', 10, 25);
     lcdCtx.fillText('Hum sol:600', 10, 50);
     lcdCtx.fillText('Lum:300Lux', 170, 25);
     lcdCtx.fillText('Hum air:39.0%', 170, 50);
@@ -512,14 +512,21 @@ function drawLCD(){
     lcdBack.position.set(-80, 340, 450);
     window.scene.add(lcdBack);
 
-    window.setLCDText = function(text) {
-        lcdCtx.fillStyle = '#006400';
-        lcdCtx.fillRect(0, 0, 256, 64);
-        lcdCtx.fillStyle = '#00ff00';
-        lcdCtx.font = 'bold 20px monospace';
-        lcdCtx.fillText(text, 10, 40);
-        lcdTexture.needsUpdate = true;
-    };
+window.setLCDText = function() {
+    lcdCtx.fillStyle = '#006400';
+    lcdCtx.fillRect(0, 0, 356, 64);
+
+    lcdCtx.fillStyle = '#00ff00';
+    lcdCtx.font = 'bold 20px monospace';
+
+    lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
+    lcdCtx.fillText('Hum sol: ' + lastSol, 10, 50);
+    lcdCtx.fillText('Lum: ' + lastLum + 'Lux', 170, 25);
+    lcdCtx.fillText('Hum air: ' + lastHum.toFixed(1) + '%', 170, 50);
+
+    lcdTexture.needsUpdate = true;
+};
+
 
 }
 
@@ -616,6 +623,11 @@ window.setPompeLock = function(lockTime) {
             lockMaterial.opacity = 1;
         }
     }
+};
+
+window.setTemp = function(newTemp) {    
+    temp = newTemp;
+    if (window.setLCDText) window.setLCDText();
 };
 
 function render() {
