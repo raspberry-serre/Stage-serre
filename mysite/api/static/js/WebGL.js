@@ -206,17 +206,6 @@ function drawToitFix() {
     toit.position.set(-99, 437, 350);
     toit.rotation.z = -(Math.PI / 2.6);
     window.scene.add(toit);
-}
-
-function drawToitMovible() {
-    var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.1,
-        shininess: 100,
-        specular: 0xffffff,
-        side: THREE.DoubleSide
-    });
 
     var geometry = new THREE.BoxGeometry(5, 210, 200);
     var toit = new THREE.Mesh(geometry, material);
@@ -322,9 +311,8 @@ function drawPump() {
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
     pumpLEDTop.position.set(60, 262, 420);
     window.scene.add(pumpLEDTop);
-}
 
-function drawPumpLock() {
+    //pump lock
     var Textureloader = new THREE.TextureLoader();
     var lockTexture = Textureloader.load('/static/js/texture/lock.png');
     lockMaterial = new THREE.MeshBasicMaterial({ map: lockTexture, transparent: true, opacity: 0 });
@@ -410,9 +398,7 @@ function drawWaterTank() {
     var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), material);
     tank.position.set(162, 240, 420);
     window.scene.add(tank);
-}
 
-function drawWater() {
     var material = new THREE.MeshPhongMaterial({ 
         color: 0x0000FF, 
         transparent: true, 
@@ -528,6 +514,8 @@ window.setLCDText = function() {
 
     lcdTexture.needsUpdate = true;
 };
+
+
 
 
 }
