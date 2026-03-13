@@ -5,7 +5,7 @@ def seed_users(apps, schema_editor):
     Usr = apps.get_model('api', 'Usr')
     
     users = [
-        {'username': 'admin', 'password': make_password('admin')},
+        {'username': 'admin', 'password': make_password('Adm1nBot$')},
     ]
     
     for user in users:
