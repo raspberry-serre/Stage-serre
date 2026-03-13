@@ -23,8 +23,11 @@ async function refreshData() {
         updateCard('tempCard', lastData.temp.toFixed(1), '°C');
         if (window.setTemp) window.setTemp(lastData.temp);
         updateCard('humCard', lastData.hum.toFixed(1), '%');
+        if (window.setHumAir) window.setHumAir(lastData.hum);
         updateCard('solCard', lastData.sol, '%');
+        if (window.setHumSol) window.setHumSol(lastData.sol);
         updateCard('lumiereCard', lastData.lumière, 'Lux');
+        if (window.setLumiere) window.setLumiere(lastData.lumière);
         updateCard('servoCard', lastData.servo, '°');
         if (window.setToitAngle) window.setToitAngle(lastData.servo);
         updateCard('periodeCard', lastData.periode, '');

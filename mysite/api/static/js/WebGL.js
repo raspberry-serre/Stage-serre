@@ -23,7 +23,9 @@ const DROP_COUNT = 30;
 var dropMesh = null;
 var dropData = [];
 var temp = 0;
-
+var humAir = 0;
+var humSol = 0;
+var lum = 0;
 
 var dropOrigin = new THREE.Vector3(85, 300, 350);
 var gravity = -0.15;
@@ -520,9 +522,9 @@ window.setLCDText = function() {
     lcdCtx.font = 'bold 20px monospace';
 
     lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
-    lcdCtx.fillText('Hum sol: ' + lastSol, 10, 50);
-    lcdCtx.fillText('Lum: ' + lastLum + 'Lux', 170, 25);
-    lcdCtx.fillText('Hum air: ' + lastHum.toFixed(1) + '%', 170, 50);
+    lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
+    lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
+    lcdCtx.fillText('Hum air: ' + humAir.toFixed(1) + '%', 170, 50);
 
     lcdTexture.needsUpdate = true;
 };
@@ -627,6 +629,21 @@ window.setPompeLock = function(lockTime) {
 
 window.setTemp = function(newTemp) {    
     temp = newTemp;
+    if (window.setLCDText) window.setLCDText();
+};
+
+window.setHumAir = function(newHumAir) {
+    humAir = newHumAir;
+    if (window.setLCDText) window.setLCDText();
+};
+
+window.setHumSol = function(newHumSol) {
+    humSol = newHumSol;
+    if (window.setLCDText) window.setLCDText();
+};
+
+window.setLumiere = function(newLumiere) {
+    lum = newLumiere;
     if (window.setLCDText) window.setLCDText();
 };
 
