@@ -678,7 +678,7 @@ function render() {
     if (toitMovible) {
         toitMovible.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.05;
         if (beltMesh) {
-            beltMesh.rotation.z = -(Math.PI/6) + (toitMovible.rotation.z + (Math.PI / 1.6));
+            beltMesh.rotation.z = (toitTargetAngle - toitMovible.rotation.z) * 0.05;
         }
     }
 
