@@ -10,6 +10,7 @@ window.scene = new THREE.Scene();
 var cameraControls;
 var clock = new THREE.Clock();
 var toitMovible = null;
+var beltMesh = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
@@ -205,14 +206,14 @@ function drawToit() {
     toit.rotation.z = -(Math.PI / 2.6);
     window.scene.add(toit);
 
-    var geometry = new THREE.BoxGeometry(5, 210, 200);
-    var toit = new THREE.Mesh(geometry, material);
-    toit.position.set(0, -105, 0);
+    var geometry2 = new THREE.BoxGeometry(5, 210, 200);
+    var toit2 = new THREE.Mesh(geometry2, material);
+    toit2.position.set(0, -105, 0);
 
     toitMovible = new THREE.Object3D();
     toitMovible.position.set(194, 397.5, 350);
     toitMovible.rotation.z = Math.PI / 2.6;
-    toitMovible.add(toit);
+    toitMovible.add(toit2);
 
     window.scene.add(toitMovible);
 }
@@ -340,6 +341,7 @@ function drawPipe() {
         depthWrite: false
     });
     var pipe = new THREE.Mesh(geometry, material);
+    pipe.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(pipe);
 
     var innerGeometry = new THREE.TubeGeometry(curve,20,1,8,false);
@@ -354,6 +356,7 @@ function drawPipe() {
     });
 
     var innerPipe = new THREE.Mesh(innerGeometry, innerPipeMaterial);
+    innerPipe.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
@@ -372,7 +375,8 @@ function drawPipe() {
         opacity: 0.3,
         shininess: 100,
         specular: 0x888888,
-        side: THREE.DoubleSide 
+        side: THREE.DoubleSide,
+        depthWrite: false  // ✅ lets inner pipe show through
     });
     var pipe1 = new THREE.Mesh(geometry1, material1);
     pipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
@@ -384,6 +388,9 @@ function drawPipe() {
         color: 0x0000FF,
         transparent: true,
         opacity: waterTube,
+        polygonOffset: true,       // ✅
+        polygonOffsetFactor: -1,   // ✅
+        polygonOffsetUnits: -1,    // ✅
     });
 
     var innerPipe1 = new THREE.Mesh(innerGeometry1, innerPipeMaterial1);
@@ -395,6 +402,7 @@ function drawWaterTank() {
     var material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false });
     var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), material);
     tank.position.set(162, 240, 420);
+    tank.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(tank);
 
     var material = new THREE.MeshPhongMaterial({ 
@@ -405,6 +413,7 @@ function drawWaterTank() {
     });
     waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
     waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
+    waterMesh.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(waterMesh);
 }
 
@@ -470,10 +479,10 @@ function drawLCD(){
     lcdCtx.fillRect(0, 0, 356, 64);
     lcdCtx.fillStyle = '#000000';
     lcdCtx.font = 'bold 20px monospace';
-    lcdCtx.fillText('Temp:'+temp+'C', 10, 25);
-    lcdCtx.fillText('Hum sol:600', 10, 50);
-    lcdCtx.fillText('Lum:300Lux', 170, 25);
-    lcdCtx.fillText('Hum air:39.0%', 170, 50);
+    lcdCtx.fillText('Temp: ' + temp + 'C', 10, 25);
+    lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
+    lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
+    lcdCtx.fillText('Hum air: ' + humAir + '%', 170, 50);
     var lcdTexture = new THREE.CanvasTexture(lcdCanvas);
 
     var material = new THREE.MeshPhongMaterial({
@@ -498,20 +507,18 @@ function drawLCD(){
     lcdBack.position.set(-80, 340, 450);
     window.scene.add(lcdBack);
 
-window.setLCDText = function() {
-    lcdCtx.fillStyle = '#006400';
-    lcdCtx.fillRect(0, 0, 356, 64);
+    window.setLCDText = function() {
+        lcdCtx.fillStyle = '#006400';
+        lcdCtx.fillRect(0, 0, 356, 64);
+        lcdCtx.fillStyle = '#000000';
+        lcdCtx.font = 'bold 20px monospace';
+        lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
+        lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
+        lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
+        lcdCtx.fillText('Hum air: ' + humAir.toFixed(1) + '%', 170, 50);
+        lcdTexture.needsUpdate = true;
+    };
 
-    lcdCtx.fillStyle = '#000000';
-    lcdCtx.font = 'bold 20px monospace';
-
-    lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
-    lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
-    lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
-    lcdCtx.fillText('Hum air: ' + humAir.toFixed(1) + '%', 170, 50);
-
-    lcdTexture.needsUpdate = true;
-};
 }
 
 function drawServo(){
@@ -526,11 +533,26 @@ function drawServo(){
     axe.rotation.x = Math.PI/2;
     window.scene.add(axe);
 
-    var arm = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 5,24), new THREE.MeshPhongMaterial({color: 0x8E8E8E}));
-    arm.position.set(80,420,415);
-    arm.rotation.x = -(Math.PI/2);
-    window.scene.add(arm);
+    var shape = new THREE.Shape();
 
+    var r1 = 10, cx1 = -65, cy1 = 0;
+    var r2 = 15, cx2 = 0,    cy2 = 0;
+
+    shape.moveTo(cx1, cy1 + r1);
+    shape.lineTo(cx2, cy2 + r2);
+
+    shape.absarc(cx2, cy2, r2, Math.PI / 2, -Math.PI / 2, true);
+
+    shape.lineTo(cx1, cy1 - r1);
+
+    shape.absarc(cx1, cy1, r1, -Math.PI / 2, Math.PI / 2, true);
+
+    var geometry = new THREE.ShapeGeometry(shape);
+    var material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
+    beltMesh = new THREE.Mesh(geometry, material);
+    beltMesh.position.set(80, 420, 430);  // centré sur le grand cercle = position du servo
+    beltMesh.rotation.z = -(Math.PI/6);
+    window.scene.add(beltMesh);    
 
 }
 
@@ -655,6 +677,9 @@ function render() {
 
     if (toitMovible) {
         toitMovible.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.05;
+        if (beltMesh) {
+            beltMesh.rotation.z = -(Math.PI/6) + (toitMovible.rotation.z + (Math.PI / 1.6));
+        }
     }
 
     if (waterMesh) {
