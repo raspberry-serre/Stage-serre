@@ -547,7 +547,7 @@ function drawServo(){
 
     shape.absarc(cx1, cy1, r1, -Math.PI / 2, Math.PI / 2, true);
 
-    var geometry = new THREE.ShapeGeometry(shape);
+    var geometry = new THREE.ExtrudeGeometry(shape,{depth:5, bevelEnabled: false});
     var material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
     beltMesh = new THREE.Mesh(geometry, material);
     beltMesh.position.set(80, 420, 430);  // centré sur le grand cercle = position du servo
