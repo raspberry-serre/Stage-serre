@@ -221,7 +221,7 @@ void loop() {
     Serial.print("\",");
     Serial.print("\"eau\":\"");
     Serial.print(eauStock);
-    Serial.print("\",");
+    Serial.print("\"");
     Serial.println("}");
   }
 
