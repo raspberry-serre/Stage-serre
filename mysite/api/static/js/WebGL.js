@@ -326,25 +326,25 @@ function drawPlant() {
 function drawPump() {
     var material = new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 100, specular: 0x888888     });
     var pumpBody = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 20, 32), material);
-    pumpBody.position.set(55, 240, 420);
+    pumpBody.position.set(55, 237, 420);
     window.scene.add(pumpBody);
 
     var pumpEntry = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
-    pumpEntry.position.set(65, 245, 420);
+    pumpEntry.position.set(65, 242, 420);
     pumpEntry.rotation.z = Math.PI / 2; 
     window.scene.add(pumpEntry);   
     
     var pumpExit = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
-    pumpExit.position.set(45, 235, 420);
+    pumpExit.position.set(45, 232, 420);
     pumpExit.rotation.z = Math.PI / 2; 
     window.scene.add(pumpExit);
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
-    pumpLed.position.set(55, 248, 420);
+    pumpLed.position.set(55, 245, 420);
     window.scene.add(pumpLed);
 
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
-    pumpLEDTop.position.set(55, 253, 420);//y+5
+    pumpLEDTop.position.set(55, 250, 420);//y+5
     window.scene.add(pumpLEDTop);
 
     //pump lock
@@ -358,8 +358,8 @@ function drawPump() {
 
 function drawPipe() {
     var curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(50, 235, 420),
-        new THREE.Vector3(0, 235, 420),
+        new THREE.Vector3(50, 232, 420),
+        new THREE.Vector3(0, 232, 420),
         new THREE.Vector3(0, 242, 350),
         new THREE.Vector3(50, 305, 350),
         new THREE.Vector3(85, 300, 350),
@@ -396,7 +396,7 @@ function drawPipe() {
     window.scene.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(60, 245, 420),
+        new THREE.Vector3(60, 242, 420),
         new THREE.Vector3(100, 245, 420),
         new THREE.Vector3(150, 262, 420),
         new THREE.Vector3(160, 262, 420),
