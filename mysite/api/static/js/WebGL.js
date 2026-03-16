@@ -283,9 +283,9 @@ function drawPlant() {
     // stem.receiveShadow = true; // shadow_code
     window.scene.add(stem);
 
-    var material = new THREE.MeshPhongMaterial({ color: 0x000000 });
-    var flower = new THREE.Mesh(new THREE.SphereGeometry(6, 32, 32), material);
-    flower.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
+    var material = new THREE.MeshPhongMaterial({ color: 0xFFFF00 });
+    var flower = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), material);
+    flower.position.set(potPosition.x, potPosition.y + 73.5, potPosition.z);
     // flower.castShadow = true; // shadow_code
     // flower.receiveShadow = true; // shadow_code
     window.scene.add(flower);
@@ -301,11 +301,22 @@ function drawPlant() {
        side: THREE.DoubleSide,
     });
 
-    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
-    petal.position.set(potPosition.x, potPosition.y + 75, potPosition.z+5);
-    petal.rotation.x = Math.PI / 2.5;
-    window.scene.add(petal);
+const petalCount = 15;
+for (let i = 0; i < petalCount; i++) {
+    const angle = (i / petalCount) * Math.PI * 2;
 
+    // Pivot sits at the center top of the stem
+    const pivot = new THREE.Object3D();
+    pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
+    pivot.rotation.y = angle; // ← handles radial direction
+
+    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+    petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
+    petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
+
+    pivot.add(petal);
+    window.scene.add(pivot);
+}
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
     var bottomLeafsLocation = [
