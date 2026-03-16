@@ -244,10 +244,10 @@ function drawPot() {
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
     window.scene.add(pot);
 
-    // --- Hollow rim on top of pot ---
-    const outerRadius = 42;  // slightly wider than pot top (40)
-    const innerRadius = 38;  // wall thickness = outerRadius - innerRadius
-    const height = 8;        // rim height
+  
+    const outerRadius = 42;  
+    const innerRadius = 38;  
+    const height = 8;       
     const segments = 64;
 
     const points = [
@@ -277,18 +277,34 @@ function drawPlant() {
     var Textureloader = new THREE.TextureLoader();
     var stemTexture = Textureloader.load('/static/js/texture/stem.jpg');
     var material = new THREE.MeshPhongMaterial({ map: stemTexture });
-    var stem = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 80, 32), material);
-    stem.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
+    var stem = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 50, 32), material);
+    stem.position.set(potPosition.x, potPosition.y + 50, potPosition.z);
     // stem.castShadow = true; // shadow_code
     // stem.receiveShadow = true; // shadow_code
     window.scene.add(stem);
 
-    var material = new THREE.MeshPhongMaterial({ color: 0xFF69B4 });
-    var flower = new THREE.Mesh(new THREE.SphereGeometry(15, 32, 32), material);
-    flower.position.set(potPosition.x, potPosition.y + 110, potPosition.z);
+    var material = new THREE.MeshPhongMaterial({ color: 0x000000 });
+    var flower = new THREE.Mesh(new THREE.SphereGeometry(6, 32, 32), material);
+    flower.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
     // flower.castShadow = true; // shadow_code
     // flower.receiveShadow = true; // shadow_code
     window.scene.add(flower);
+
+    const petalShape = new THREE.Shape();
+    petalShape.moveTo(0, 0);
+    petalShape.bezierCurveTo(-12, 8, -10, 32, 0, 40);
+    petalShape.bezierCurveTo(10, 32, 12, 8, 0, 0);
+
+    const petalGeometry = new THREE.ShapeGeometry(petalShape, 32);
+    const petalMaterial = new THREE.MeshPhongMaterial({
+       color: 0xff66aa,
+       side: THREE.DoubleSide,
+    });
+
+    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+    petal.position.set(potPosition.x, potPosition.y + 75, potPosition.z+5);
+    petal.rotation.x = Math.PI / 2.5;
+    window.scene.add(petal);
 
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
