@@ -515,7 +515,7 @@ function drawLCD(){
     lcdCtx.fillRect(0, 0, 356, 64);
     lcdCtx.fillStyle = '#000000';
     lcdCtx.font = 'bold 20px monospace';
-    lcdCtx.fillText('Temp: ' + temp + 'C', 10, 25);
+    lcdCtx.fillText('Temp: ' + temp + '°C', 10, 25);
     lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
     lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
     lcdCtx.fillText('Hum air: ' + humAir + '%', 170, 50);
