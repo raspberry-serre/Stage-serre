@@ -41,6 +41,7 @@ async function refreshData() {
             updateCard('lockCard', 'Locked : ' + lastData.pompe_lock + 's');
         }
         if (window.setPompeLock) window.setPompeLock(lastData.pompe_lock);
+        updateCard('eauCard', lastData.eau, 'ml');
 
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {
