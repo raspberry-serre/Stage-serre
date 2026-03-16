@@ -361,7 +361,7 @@ function drawPipe() {
         new THREE.Vector3(50, 235, 420),
         new THREE.Vector3(0, 235, 420),
         new THREE.Vector3(0, 242, 350),
-        new THREE.Vector3(50, 295, 350),
+        new THREE.Vector3(50, 305, 350),
         new THREE.Vector3(85, 300, 350),
     ]);
 
