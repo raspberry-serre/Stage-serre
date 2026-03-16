@@ -306,7 +306,12 @@ function drawPump() {
     var pumpEntry = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
     pumpEntry.position.set(65, 245, 420);
     pumpEntry.rotation.z = Math.PI / 2; 
-    window.scene.add(pumpEntry);    
+    window.scene.add(pumpEntry);   
+    
+    var pumpExit = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
+    pumpExit.position.set(45, 235, 420);
+    pumpExit.rotation.z = Math.PI / 2; 
+    window.scene.add(pumpExit);
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
     pumpLed.position.set(60, 257, 420);
@@ -327,8 +332,8 @@ function drawPump() {
 
 function drawPipe() {
     var curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(50, 232, 420),
-        new THREE.Vector3(0, 242, 400),
+        new THREE.Vector3(50, 235, 420),
+        new THREE.Vector3(0, 235, 420),
         new THREE.Vector3(0, 242, 350),
         new THREE.Vector3(50, 295, 350),
         new THREE.Vector3(85, 300, 350),
@@ -349,7 +354,7 @@ function drawPipe() {
     pipe.frustumCulled = false;  
     window.scene.add(pipe);
 
-    var innerGeometry = new THREE.TubeGeometry(curve,20,1,8,false);
+    var innerGeometry = new THREE.TubeGeometry(curve,20,1.5,8,false);
 
     innerPipeMaterial = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
@@ -381,25 +386,25 @@ function drawPipe() {
         shininess: 100,
         specular: 0x888888,
         side: THREE.DoubleSide,
-        depthWrite: false  // ✅ lets inner pipe show through
+        depthWrite: false  
     });
     var pipe1 = new THREE.Mesh(geometry1, material1);
-    pipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    pipe1.frustumCulled = false; 
     window.scene.add(pipe1);
 
-    var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1,8,false);
+    var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1.5,8,false);
 
     innerPipeMaterial1 = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
         transparent: true,
         opacity: waterTube,
-        polygonOffset: true,       // ✅
-        polygonOffsetFactor: -1,   // ✅
-        polygonOffsetUnits: -1,    // ✅
+        polygonOffset: true,       
+        polygonOffsetFactor: -1,   
+        polygonOffsetUnits: -1,    
     });
 
     var innerPipe1 = new THREE.Mesh(innerGeometry1, innerPipeMaterial1);
-    innerPipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    innerPipe1.frustumCulled = false;  
     window.scene.add(innerPipe1);
 }
 
