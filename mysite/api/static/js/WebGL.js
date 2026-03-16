@@ -228,7 +228,6 @@ function drawLED() {
         window.scene.add(led);
     });
 }
-
 function drawPot() {
     var Textureloader = new THREE.TextureLoader();
     var sideTexture = Textureloader.load('/static/js/texture/pot.jpg');
@@ -237,14 +236,41 @@ function drawPot() {
     var topMaterial = new THREE.MeshPhongMaterial({ map: topTexture });
     var bottomMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
 
+    // --- Pot body ---
     var pot = new THREE.Mesh(
         new THREE.CylinderGeometry(40, 30, 70, 32),
         [sideMaterial, topMaterial, bottomMaterial]
     );
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
-    // pot.castShadow = true; // shadow_code
-    // pot.receiveShadow = true; // shadow_code
     window.scene.add(pot);
+
+    // --- Hollow rim on top of pot ---
+    const outerRadius = 42;  // slightly wider than pot top (40)
+    const innerRadius = 38;  // wall thickness = outerRadius - innerRadius
+    const height = 8;        // rim height
+    const segments = 64;
+
+    const points = [
+        new THREE.Vector2(innerRadius, 0),
+        new THREE.Vector2(outerRadius, 0),
+        new THREE.Vector2(outerRadius, height),
+        new THREE.Vector2(innerRadius, height),
+        new THREE.Vector2(innerRadius, 0),
+    ];
+
+    const rimGeometry = new THREE.LatheGeometry(points, segments);
+    const rimMaterial = new THREE.MeshPhongMaterial({
+        map: sideTexture,
+        side: THREE.DoubleSide,
+    });
+
+    var rim = new THREE.Mesh(rimGeometry, rimMaterial);
+
+    // Position rim sitting on top of the pot
+    // Pot height is 70, so top face is at potPosition.y + 35
+    rim.position.set(potPosition.x, potPosition.y + 35, potPosition.z);
+
+    window.scene.add(rim);
 }
 
 function drawPlant() {
