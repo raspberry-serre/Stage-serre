@@ -52,6 +52,7 @@ unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
 unsigned long pumptime = PUMP_LOCK_TIME / 1000;
 int eauStock = 100; 
+float pump_debit=4.16; //ml/s
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
@@ -156,7 +157,10 @@ void loop() {
     pumpRunning = true;
     pumpStartTime = now;
     digitalWrite(PUMP_RELAY_PIN, HIGH);
-
+      if (eauStock > 0) {
+        eauStock -= pump_debit*(PUMP_ON_TIME / 1000.0); // Consomme 100 ml par cycle de pompe
+        if (eauStock < 0) eauStock = 0; // Ne pas descendre en dessous de 0
+      }
   }
 
   // ----- STOP PUMP AFTER ON TIME -----
