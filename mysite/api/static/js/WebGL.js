@@ -528,8 +528,8 @@ function drawServo(){
     servo.rotation.z = Math.PI/2.6;
     window.scene.add(servo);
 
-    var axe = new THREE.Mesh(new THREE.CylinderGeometry(2,2,30,24), new THREE.MeshPhongMaterial({color: 0x8E8E8E}));
-    axe.position.set(80, 420, 430);
+    var axe = new THREE.Mesh(new THREE.CylinderGeometry(2,2,15,24), new THREE.MeshPhongMaterial({color: 0x8E8E8E}));
+    axe.position.set(80, 420, 435);
     axe.rotation.x = Math.PI/2;
     window.scene.add(axe);
 
@@ -548,7 +548,7 @@ function drawServo(){
     shape.absarc(cx1, cy1, r1, -Math.PI / 2, Math.PI / 2, true);
 
     var geometry = new THREE.ExtrudeGeometry(shape,{depth:5, bevelEnabled: false});
-    var material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide});
     beltMesh = new THREE.Mesh(geometry, material);
     beltMesh.position.set(80, 420, 430);  // centré sur le grand cercle = position du servo
     beltMesh.rotation.z = -(Math.PI*1.3);
@@ -573,6 +573,7 @@ function init() {
     cameraControls.target.set(0, 43, -8);
 
     // lock camera
+
     cameraControls.enablePan = false;
     cameraControls.maxPolarAngle = Math.PI / 2.3;
     cameraControls.minPolarAngle = Math.PI / 4;
