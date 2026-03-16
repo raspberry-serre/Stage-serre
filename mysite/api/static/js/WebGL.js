@@ -298,17 +298,22 @@ function drawPlant() {
 }
 
 function drawPump() {
-    var material = new THREE.MeshPhongMaterial({ color: 0x0000FF });
-    var pump = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 30, 32), material);
-    pump.position.set(50, 242, 420);
-    window.scene.add(pump);
+    var material = new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 100, specular: 0x888888     });
+    var pumpBody = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 20, 32), material);
+    pumpBody.position.set(55, 240, 420);
+    window.scene.add(pumpBody);
+
+    var pumpEntry = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
+    pumpEntry.position.set(65, 245, 420);
+    pumpEntry.rotation.z = Math.PI / 2; 
+    window.scene.add(pumpEntry);    
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
     pumpLed.position.set(60, 257, 420);
     window.scene.add(pumpLed);
 
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
-    pumpLEDTop.position.set(60, 262, 420);
+    pumpLEDTop.position.set(60, 262, 420);//y+5
     window.scene.add(pumpLEDTop);
 
     //pump lock
@@ -341,7 +346,7 @@ function drawPipe() {
         depthWrite: false
     });
     var pipe = new THREE.Mesh(geometry, material);
-    pipe.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    pipe.frustumCulled = false;  
     window.scene.add(pipe);
 
     var innerGeometry = new THREE.TubeGeometry(curve,20,1,8,false);
@@ -356,12 +361,12 @@ function drawPipe() {
     });
 
     var innerPipe = new THREE.Mesh(innerGeometry, innerPipeMaterial);
-    innerPipe.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    innerPipe.frustumCulled = false;  
     window.scene.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(60, 252, 420),
-        new THREE.Vector3(100, 257, 420),
+        new THREE.Vector3(60, 245, 420),
+        new THREE.Vector3(100, 245, 420),
         new THREE.Vector3(150, 262, 420),
         new THREE.Vector3(160, 262, 420),
         new THREE.Vector3(162, 240, 420),
