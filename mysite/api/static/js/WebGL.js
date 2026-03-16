@@ -293,8 +293,8 @@ function drawPlant() {
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
     var bottomLeafsLocation = [
-        { x: potPosition.x - 8, y: potPosition.y + 40, z: potPosition.z, rotationz: -(Math.PI/1.2) },
-        { x: potPosition.x + 8, y: potPosition.y + 40, z: potPosition.z, rotationz: Math.PI/1.2}
+        { x: potPosition.x - 8, y: potPosition.y + 43, z: potPosition.z, rotationz: -(Math.PI/1.2) },
+        { x: potPosition.x + 8, y: potPosition.y + 43, z: potPosition.z, rotationz: Math.PI/1.2}
     ];
     bottomLeafsLocation.forEach(pos => {
         var leaf = new THREE.Mesh(
@@ -308,8 +308,8 @@ function drawPlant() {
     });
 
     var topLeafsLocation = [
-        { x: potPosition.x - 18, y: potPosition.y + 57, z: potPosition.z, rotationz: -(Math.PI/1.2)+Math.PI },
-        { x: potPosition.x + 18, y: potPosition.y + 57, z: potPosition.z, rotationz: Math.PI/1.2+Math.PI }
+        { x: potPosition.x - 18, y: potPosition.y + 60, z: potPosition.z, rotationz: -(Math.PI/1.2)+Math.PI },
+        { x: potPosition.x + 18, y: potPosition.y + 60, z: potPosition.z, rotationz: Math.PI/1.2+Math.PI }
     ];
     topLeafsLocation.forEach(pos => {
         var leaf = new THREE.Mesh(
