@@ -314,11 +314,11 @@ function drawPump() {
     window.scene.add(pumpExit);
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
-    pumpLed.position.set(55, 250, 420);
+    pumpLed.position.set(55, 248, 420);
     window.scene.add(pumpLed);
 
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
-    pumpLEDTop.position.set(55, 255, 420);//y+5
+    pumpLEDTop.position.set(55, 253, 420);//y+5
     window.scene.add(pumpLEDTop);
 
     //pump lock
