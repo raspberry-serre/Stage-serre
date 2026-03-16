@@ -51,6 +51,7 @@ bool force_pompe = false;
 unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
 unsigned long pumptime = PUMP_LOCK_TIME / 1000;
+int eauStock = 100; 
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
@@ -155,6 +156,7 @@ void loop() {
     pumpRunning = true;
     pumpStartTime = now;
     digitalWrite(PUMP_RELAY_PIN, HIGH);
+
   }
 
   // ----- STOP PUMP AFTER ON TIME -----
@@ -216,7 +218,10 @@ void loop() {
     Serial.print("\",");
     Serial.print("\"pompe_lock\":\"");
     Serial.print(pumptime);
-    Serial.print("\"");
+    Serial.print("\",");
+    Serial.print("\"eau\":\"");
+    Serial.print(eauStock);
+    Serial.print("\",");
     Serial.println("}");
   }
 
