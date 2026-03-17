@@ -51,8 +51,9 @@ bool force_pompe = false;
 unsigned long pumpStartTime = 0;
 unsigned long pumpLockStartTime = 0;
 unsigned long pumptime = PUMP_LOCK_TIME / 1000;
-int eauStock = 100; 
-float pump_debit=4.16; //ml/s
+int eauStock = 100;
+float pump_debit = 4.16;  //ml/s
+bool lowEau = false;
 
 /* ====== SERVO ETAT ====== */
 bool servoAttached = false;
@@ -152,25 +153,27 @@ void loop() {
     }
   }
 
-  // ----- START PUMP -----
-  if (!pumpLocked && (!pumpRunning && (soilDry || force_pompe == true))) {
-    pumpRunning = true;
-    pumpStartTime = now;
-    digitalWrite(PUMP_RELAY_PIN, HIGH);
+  if (!lowEau) {
+    // ----- START PUMP -----
+    if (!pumpLocked && (!pumpRunning && (soilDry || force_pompe == true))) {
+      pumpRunning = true;
+      pumpStartTime = now;
+      digitalWrite(PUMP_RELAY_PIN, HIGH);
       if (eauStock > 0) {
-        eauStock -= pump_debit*(PUMP_ON_TIME / 1000.0); // Consomme 100 ml par cycle de pompe
-        if (eauStock < 0) eauStock = 0; // Ne pas descendre en dessous de 0
+        eauStock -= pump_debit * (PUMP_ON_TIME / 1000.0);  // Consomme 100 ml par cycle de pompe
+        if (eauStock < 0) eauStock = 0;                    // Ne pas descendre en dessous de 0
       }
+    }
   }
-
-  // ----- STOP PUMP AFTER ON TIME -----
-  if (pumpRunning && now - pumpStartTime >= PUMP_ON_TIME) {
-    pumpRunning = false;
-    pumpLocked = true;
-    pumpLockStartTime = now;
-    force_pompe = false;
-    digitalWrite(PUMP_RELAY_PIN, LOW);
-  }
+    // ----- STOP PUMP AFTER ON TIME -----
+    if (pumpRunning && now - pumpStartTime >= PUMP_ON_TIME) {
+      pumpRunning = false;
+      pumpLocked = true;
+      pumpLockStartTime = now;
+      force_pompe = false;
+      digitalWrite(PUMP_RELAY_PIN, LOW);
+    }
+  
 
   lcd.setCursor(0, 1);
   lcd.print(soilValue);
@@ -278,12 +281,14 @@ void loop() {
 
       } else if (cmd == "pompe_on") {
         if (!pumpLocked) {
-          force_pompe = true;  
+          force_pompe = true;
         }
-      }else if (cmd == "refill") {
-        eauStock = 100;  
-      }else if (cmd == "lowEau") {
-        digitalWrite(LIGHT_RELAY_PIN, HIGH);
+      } else if (cmd == "refill") {
+        eauStock = 100;
+        lowEau = false;
+      } else if (cmd == "lowEau") {
+
+        lowEau = true;
       }
 
 
