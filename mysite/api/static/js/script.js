@@ -58,6 +58,11 @@ async function refreshData() {
             ledBtn.dataset.action = isOn ? 'off' : 'on';
         }
 
+        const refillBtn = document.getElementById('refillBtn');
+        if (refillBtn) {
+           refillBtn.style.display = lastData.pompe_lock == 0 ? 'block' : 'none';
+        }
+
         const ledIndicator = document.querySelector('.status-indicator');
         const ledCard = document.getElementById('ledCard');
         if (ledIndicator && ledCard) {
@@ -229,18 +234,21 @@ function initToggle() {
         var toitBtn = document.getElementById('toitBtn');
         var ledBtn = document.getElementById('ledBtn');
         var pompeBtn = document.getElementById('pompeBtn');
+        var refillBtn = document.getElementById('refillBtn');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
             if (label) label.textContent = '1';
             if (toitBtn) toitBtn.style.display = 'block';
             if (ledBtn) ledBtn.style.display = 'block';
             if (pompeBtn) pompeBtn.style.display = 'block';
+            if (refillBtn) refillBtn.style.display = 'block';
         } else {
             switchEl.classList.remove('is-checked');
             if (label) label.textContent = '0';
             if (toitBtn) toitBtn.style.display = 'none';
             if (ledBtn) ledBtn.style.display = 'none';
             if (pompeBtn) pompeBtn.style.display = 'none';
+            if (refillBtn) refillBtn.style.display = 'none';
         }
     }
 
@@ -303,6 +311,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    var refillBtn = document.getElementById('refillBtn');
+        if (refillBtn) {
+            refillBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                sendPompeCommand('on');
+            });
+            var text = (pompeBtn.textContent || '').trim().toLowerCase();
+        }       
 
     var deconnexionBtn = document.getElementById('deconnexionBtn');
     if (deconnexionBtn) {
