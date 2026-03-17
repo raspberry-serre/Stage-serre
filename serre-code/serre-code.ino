@@ -282,6 +282,8 @@ void loop() {
         }
       }else if (cmd == "refill") {
         eauStock = 100;  
+      }else if (cmd == "lowEau") {
+        digitalWrite(LIGHT_RELAY_PIN, HIGH);
       }
 
 
