@@ -42,6 +42,7 @@ async function refreshData() {
         }
         if (window.setPompeLock) window.setPompeLock(lastData.pompe_lock);
         updateCard('eauCard', lastData.eau, 'ml');
+        if (window.setEauStock) window.setEauStock(lastData.eau);
 
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {

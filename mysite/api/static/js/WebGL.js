@@ -14,7 +14,9 @@ var beltMesh = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
-var waterlevel = 22;
+var waterFull=22;
+var waterlevel = waterFull;
+var waterPercent = 100;
 var waterMesh = null;
 var tankBottom = 225;
 var waterTube = 0;
@@ -697,11 +699,10 @@ window.setLedIntensity = function(ledState) {
 
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
-    if (pompeState === 'ON') {
-        waterlevel = Math.max(0, waterlevel - 0.5);  // ✅ never goes below 0
-        waterTube = 0.8;  // ✅ make tube visible when pump is on
+    if (pompeState === 'ON') {  
+        waterTube = 0.8; 
     } else {
-        waterTube = 0;  // ✅ hide tube when pump is off
+        waterTube = 0;  
     }
 };
 
@@ -734,6 +735,11 @@ window.setLumiere = function(newLumiere) {
     lum = newLumiere;
     if (window.setLCDText) window.setLCDText();
 };
+
+window.setEauStock = function(eauStock) {
+    waterlevel = waterFull*((waterPercent * (eauStock / 100)) / 100);
+};
+
 
 function render() {
     var delta = clock.getDelta();
