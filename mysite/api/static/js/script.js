@@ -4,6 +4,7 @@ const TOIT_OPEN_ANGLE = 180;
 let autoRefreshEnabled = true;
 let refreshInterval = 1000;
 let refreshTimer = null;
+var modeCheckbox = null;
 
 function updateLastUpdate() {
     const now = new Date();
@@ -56,6 +57,15 @@ async function refreshData() {
             const isOn = lastData.led === 'ON';
             ledBtn.textContent = isOn ? 'Éteindre' : 'Allumer';
             ledBtn.dataset.action = isOn ? 'off' : 'on';
+        }
+
+        const pompeBtn = document.getElementById('pompeBtn');
+        if (pompeBtn && modeCheckbox && modeCheckbox.checked) { 
+            if (lastData.debit * lastData.pump_on_time > lastData.eau) {
+                pompeBtn.style.display = 'none';
+            } else {
+                pompeBtn.style.display = 'block';
+            }
         }
 
         const ledIndicator = document.querySelector('.status-indicator');
@@ -244,7 +254,6 @@ function initToggle() {
         var toitBtn = document.getElementById('toitBtn');
         var ledBtn = document.getElementById('ledBtn');
         var pompeBtn = document.getElementById('pompeBtn');
-        var refillBtn = document.getElementById('refillBtn');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
             if (label) label.textContent = '1';
@@ -271,6 +280,8 @@ function initToggle() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    modeCheckbox = document.getElementById('modeCheckbox');
+    
     if (window.location.pathname === '/logs/') {
         refreshLogs();
         setInterval(refreshLogs, 2000);

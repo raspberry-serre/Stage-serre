@@ -14,6 +14,7 @@ class Serre(models.Model):
     pompe_lock = models.IntegerField(default=600)
     eau = models.IntegerField(default=100000)
     debit = models.FloatField(default=0.0)
+    pump_on_time = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
