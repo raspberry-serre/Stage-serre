@@ -14,7 +14,8 @@ var beltMesh = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
-var waterlevel = 100;
+var waterFull=22;
+var waterlevel = waterFull;
 var waterMesh = null;
 var tankBottom = 225;
 var waterTube = 0;
@@ -735,7 +736,7 @@ window.setLumiere = function(newLumiere) {
 };
 
 window.setEauStock = function(eauStock) {
-    waterlevel = eauStock
+    waterlevel = (eauStock/100)*waterFull;
 };
 
 
