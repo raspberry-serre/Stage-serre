@@ -13,6 +13,7 @@ class Serre(models.Model):
     led = models.CharField(max_length=10, default='OFF')
     pompe_lock = models.IntegerField(default=600)
     eau = models.IntegerField(default=100000)
+    debit = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
