@@ -10,10 +10,12 @@ window.scene = new THREE.Scene();
 var cameraControls;
 var clock = new THREE.Clock();
 var toitMovible = null;
+var beltMesh = null;
 var potPosition = { x: 100, y: 260, z: 350 };
 var pumpLedMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
 var lockMaterial = null;
-var waterlevel = 22;
+var waterFull=22;
+var waterlevel = waterFull;
 var waterMesh = null;
 var tankBottom = 225;
 var waterTube = 0;
@@ -55,18 +57,16 @@ function fillScene() {
     drawSerreWalls();
     drawPillars();
     drawSupportToit();
-    drawToitFix();
-    drawToitMovible();
+    drawToit();
     drawLED();
     drawPot();
     drawPlant();
     drawPump();
-    drawPumpLock();
     drawPipe();
     drawWaterTank();
-    drawWater();
     drawWaterDrops();
     drawLCD();
+    drawServo();
 }
 
 function drawTable() {
@@ -191,7 +191,7 @@ function drawSupportToit() {
     });
 }
 
-function drawToitFix() {
+function drawToit() {
     var material = new THREE.MeshPhongMaterial({
         color: 0xffffff,
         transparent: true,
@@ -206,26 +206,15 @@ function drawToitFix() {
     toit.position.set(-99, 437, 350);
     toit.rotation.z = -(Math.PI / 2.6);
     window.scene.add(toit);
-}
 
-function drawToitMovible() {
-    var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.1,
-        shininess: 100,
-        specular: 0xffffff,
-        side: THREE.DoubleSide
-    });
-
-    var geometry = new THREE.BoxGeometry(5, 210, 200);
-    var toit = new THREE.Mesh(geometry, material);
-    toit.position.set(0, -105, 0);
+    var geometry2 = new THREE.BoxGeometry(5, 210, 200);
+    var toit2 = new THREE.Mesh(geometry2, material);
+    toit2.position.set(0, -105, 0);
 
     toitMovible = new THREE.Object3D();
-    toitMovible.position.set(190, 400, 350);
+    toitMovible.position.set(194, 397.5, 350);
     toitMovible.rotation.z = Math.PI / 2.6;
-    toitMovible.add(toit);
+    toitMovible.add(toit2);
 
     window.scene.add(toitMovible);
 }
@@ -240,7 +229,6 @@ function drawLED() {
         window.scene.add(led);
     });
 }
-
 function drawPot() {
     var Textureloader = new THREE.TextureLoader();
     var sideTexture = Textureloader.load('/static/js/texture/pot.jpg');
@@ -249,38 +237,92 @@ function drawPot() {
     var topMaterial = new THREE.MeshPhongMaterial({ map: topTexture });
     var bottomMaterial = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
 
+    // --- Pot body ---
     var pot = new THREE.Mesh(
         new THREE.CylinderGeometry(40, 30, 70, 32),
         [sideMaterial, topMaterial, bottomMaterial]
     );
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
-    // pot.castShadow = true; // shadow_code
-    // pot.receiveShadow = true; // shadow_code
     window.scene.add(pot);
+
+  
+    const outerRadius = 42;  
+    const innerRadius = 38;  
+    const height = 8;       
+    const segments = 64;
+
+    const points = [
+        new THREE.Vector2(innerRadius, 0),
+        new THREE.Vector2(outerRadius, 0),
+        new THREE.Vector2(outerRadius, height),
+        new THREE.Vector2(innerRadius, height),
+        new THREE.Vector2(innerRadius, 0),
+    ];
+
+    const rimGeometry = new THREE.LatheGeometry(points, segments);
+    const rimMaterial = new THREE.MeshPhongMaterial({
+        map: sideTexture,
+        side: THREE.DoubleSide,
+    });
+
+    var rim = new THREE.Mesh(rimGeometry, rimMaterial);
+
+    // Position rim sitting on top of the pot
+    // Pot height is 70, so top face is at potPosition.y + 35
+    rim.position.set(potPosition.x, potPosition.y + 35, potPosition.z);
+
+    window.scene.add(rim);
 }
 
 function drawPlant() {
     var Textureloader = new THREE.TextureLoader();
     var stemTexture = Textureloader.load('/static/js/texture/stem.jpg');
     var material = new THREE.MeshPhongMaterial({ map: stemTexture });
-    var stem = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 80, 32), material);
-    stem.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
+    var stem = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 50, 32), material);
+    stem.position.set(potPosition.x, potPosition.y + 50, potPosition.z);
     // stem.castShadow = true; // shadow_code
     // stem.receiveShadow = true; // shadow_code
     window.scene.add(stem);
 
-    var material = new THREE.MeshPhongMaterial({ color: 0xFF69B4 });
-    var flower = new THREE.Mesh(new THREE.SphereGeometry(15, 32, 32), material);
-    flower.position.set(potPosition.x, potPosition.y + 110, potPosition.z);
+    var material = new THREE.MeshPhongMaterial({ color: 0xFFFF00 });
+    var flower = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), material);
+    flower.position.set(potPosition.x, potPosition.y + 73.5, potPosition.z);
     // flower.castShadow = true; // shadow_code
     // flower.receiveShadow = true; // shadow_code
     window.scene.add(flower);
 
+    const petalShape = new THREE.Shape();
+    petalShape.moveTo(0, 0);
+    petalShape.bezierCurveTo(-12, 8, -10, 32, 0, 40);
+    petalShape.bezierCurveTo(10, 32, 12, 8, 0, 0);
+
+    const petalGeometry = new THREE.ShapeGeometry(petalShape, 32);
+    const petalMaterial = new THREE.MeshPhongMaterial({
+       color: 0xff66aa,
+       side: THREE.DoubleSide,
+    });
+
+const petalCount = 15;
+for (let i = 0; i < petalCount; i++) {
+    const angle = (i / petalCount) * Math.PI * 2;
+
+    // Pivot sits at the center top of the stem
+    const pivot = new THREE.Object3D();
+    pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
+    pivot.rotation.y = angle; // ← handles radial direction
+
+    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+    petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
+    petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
+
+    pivot.add(petal);
+    window.scene.add(pivot);
+}
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
     var bottomLeafsLocation = [
-        { x: potPosition.x - 8, y: potPosition.y + 40, z: potPosition.z, rotationz: -(Math.PI/1.2) },
-        { x: potPosition.x + 8, y: potPosition.y + 40, z: potPosition.z, rotationz: Math.PI/1.2}
+        { x: potPosition.x - 8, y: potPosition.y + 43, z: potPosition.z, rotationz: -(Math.PI/1.2) },
+        { x: potPosition.x + 8, y: potPosition.y + 43, z: potPosition.z, rotationz: Math.PI/1.2}
     ];
     bottomLeafsLocation.forEach(pos => {
         var leaf = new THREE.Mesh(
@@ -294,8 +336,8 @@ function drawPlant() {
     });
 
     var topLeafsLocation = [
-        { x: potPosition.x - 18, y: potPosition.y + 57, z: potPosition.z, rotationz: -(Math.PI/1.2)+Math.PI },
-        { x: potPosition.x + 18, y: potPosition.y + 57, z: potPosition.z, rotationz: Math.PI/1.2+Math.PI }
+        { x: potPosition.x - 18, y: potPosition.y + 60, z: potPosition.z, rotationz: -(Math.PI/1.2)+Math.PI },
+        { x: potPosition.x + 18, y: potPosition.y + 60, z: potPosition.z, rotationz: Math.PI/1.2+Math.PI }
     ];
     topLeafsLocation.forEach(pos => {
         var leaf = new THREE.Mesh(
@@ -310,21 +352,30 @@ function drawPlant() {
 }
 
 function drawPump() {
-    var material = new THREE.MeshPhongMaterial({ color: 0x0000FF });
-    var pump = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 30, 32), material);
-    pump.position.set(50, 242, 420);
-    window.scene.add(pump);
+    var material = new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 100, specular: 0x888888     });
+    var pumpBody = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 20, 32), material);
+    pumpBody.position.set(55, 237, 420);
+    window.scene.add(pumpBody);
+
+    var pumpEntry = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
+    pumpEntry.position.set(65, 242, 420);
+    pumpEntry.rotation.z = Math.PI / 2; 
+    window.scene.add(pumpEntry);   
+    
+    var pumpExit = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
+    pumpExit.position.set(45, 232, 420);
+    pumpExit.rotation.z = Math.PI / 2; 
+    window.scene.add(pumpExit);
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
-    pumpLed.position.set(60, 257, 420);
+    pumpLed.position.set(55, 245, 420);
     window.scene.add(pumpLed);
 
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
-    pumpLEDTop.position.set(60, 262, 420);
+    pumpLEDTop.position.set(55, 250, 420);//y+5
     window.scene.add(pumpLEDTop);
-}
 
-function drawPumpLock() {
+    //pump lock
     var Textureloader = new THREE.TextureLoader();
     var lockTexture = Textureloader.load('/static/js/texture/lock.png');
     lockMaterial = new THREE.MeshBasicMaterial({ map: lockTexture, transparent: true, opacity: 0 });
@@ -336,9 +387,9 @@ function drawPumpLock() {
 function drawPipe() {
     var curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(50, 232, 420),
-        new THREE.Vector3(0, 242, 400),
+        new THREE.Vector3(0, 232, 420),
         new THREE.Vector3(0, 242, 350),
-        new THREE.Vector3(50, 295, 350),
+        new THREE.Vector3(50, 305, 350),
         new THREE.Vector3(85, 300, 350),
     ]);
 
@@ -354,9 +405,10 @@ function drawPipe() {
         depthWrite: false
     });
     var pipe = new THREE.Mesh(geometry, material);
+    pipe.frustumCulled = false;  
     window.scene.add(pipe);
 
-    var innerGeometry = new THREE.TubeGeometry(curve,20,1,8,false);
+    var innerGeometry = new THREE.TubeGeometry(curve,20,1.5,8,false);
 
     innerPipeMaterial = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
@@ -368,12 +420,13 @@ function drawPipe() {
     });
 
     var innerPipe = new THREE.Mesh(innerGeometry, innerPipeMaterial);
+    innerPipe.frustumCulled = false;  
     window.scene.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(60, 252, 420),
-        new THREE.Vector3(100, 257, 420),
-        new THREE.Vector3(150, 262, 420),
+        new THREE.Vector3(60, 242, 420),
+        new THREE.Vector3(100, 245, 420),
+        new THREE.Vector3(150, 267, 420),
         new THREE.Vector3(160, 262, 420),
         new THREE.Vector3(162, 240, 420),
     ]);
@@ -386,33 +439,36 @@ function drawPipe() {
         opacity: 0.3,
         shininess: 100,
         specular: 0x888888,
-        side: THREE.DoubleSide 
+        side: THREE.DoubleSide,
+        depthWrite: false  
     });
     var pipe1 = new THREE.Mesh(geometry1, material1);
-    pipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    pipe1.frustumCulled = false; 
     window.scene.add(pipe1);
 
-    var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1,8,false);
+    var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1.5,8,false);
 
     innerPipeMaterial1 = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
         transparent: true,
         opacity: waterTube,
+        polygonOffset: true,       
+        polygonOffsetFactor: -1,   
+        polygonOffsetUnits: -1,    
     });
 
     var innerPipe1 = new THREE.Mesh(innerGeometry1, innerPipeMaterial1);
-    innerPipe1.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
+    innerPipe1.frustumCulled = false;  
     window.scene.add(innerPipe1);
 }
 
 function drawWaterTank() {
     var material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false });
-    var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), material);
+    var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 40, 40), material);
     tank.position.set(162, 240, 420);
+    tank.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(tank);
-}
 
-function drawWater() {
     var material = new THREE.MeshPhongMaterial({ 
         color: 0x0000FF, 
         transparent: true, 
@@ -420,7 +476,8 @@ function drawWater() {
         depthWrite: false 
     });
     waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
-    waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
+    waterMesh.position.set(162, tankBottom + waterlevel+100 / 2, 420);
+    waterMesh.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(waterMesh);
 }
 
@@ -486,10 +543,10 @@ function drawLCD(){
     lcdCtx.fillRect(0, 0, 356, 64);
     lcdCtx.fillStyle = '#000000';
     lcdCtx.font = 'bold 20px monospace';
-    lcdCtx.fillText('Temp:'+temp+'C', 10, 25);
-    lcdCtx.fillText('Hum sol:600', 10, 50);
-    lcdCtx.fillText('Lum:300Lux', 170, 25);
-    lcdCtx.fillText('Hum air:39.0%', 170, 50);
+    lcdCtx.fillText('Temp: ' + temp + '°C', 10, 25);
+    lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
+    lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
+    lcdCtx.fillText('Hum air: ' + humAir + '%', 170, 50);
     var lcdTexture = new THREE.CanvasTexture(lcdCanvas);
 
     var material = new THREE.MeshPhongMaterial({
@@ -514,21 +571,52 @@ function drawLCD(){
     lcdBack.position.set(-80, 340, 450);
     window.scene.add(lcdBack);
 
-window.setLCDText = function() {
-    lcdCtx.fillStyle = '#006400';
-    lcdCtx.fillRect(0, 0, 356, 64);
+    window.setLCDText = function() {
+        lcdCtx.fillStyle = '#006400';
+        lcdCtx.fillRect(0, 0, 356, 64);
+        lcdCtx.fillStyle = '#000000';
+        lcdCtx.font = 'bold 20px monospace';
+        lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
+        lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
+        lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
+        lcdCtx.fillText('Hum air: ' + humAir.toFixed(1) + '%', 170, 50);
+        lcdTexture.needsUpdate = true;
+    };
 
-    lcdCtx.fillStyle = '#00ff00';
-    lcdCtx.font = 'bold 20px monospace';
+}
 
-    lcdCtx.fillText('Temp: ' + temp.toFixed(1) + 'C', 10, 25);
-    lcdCtx.fillText('Hum sol: ' + humSol, 10, 50);
-    lcdCtx.fillText('Lum: ' + lum + 'Lux', 170, 25);
-    lcdCtx.fillText('Hum air: ' + humAir.toFixed(1) + '%', 170, 50);
+function drawServo(){
 
-    lcdTexture.needsUpdate = true;
-};
+    var servo = new THREE.Mesh(new THREE.BoxGeometry(20, 40, 20), new THREE.MeshPhongMaterial({ color: 0x333333 }));
+    servo.position.set(70, 420, 450);
+    servo.rotation.z = Math.PI/2.6;
+    window.scene.add(servo);
 
+    var axe = new THREE.Mesh(new THREE.CylinderGeometry(2,2,15,24), new THREE.MeshPhongMaterial({color: 0x8E8E8E}));
+    axe.position.set(80, 420, 435);
+    axe.rotation.x = Math.PI/2;
+    window.scene.add(axe);
+
+    var shape = new THREE.Shape();
+
+    var r1 = 10, cx1 = -65, cy1 = 0;
+    var r2 = 15, cx2 = 0,    cy2 = 0;
+
+    shape.moveTo(cx1, cy1 + r1);
+    shape.lineTo(cx2, cy2 + r2);
+
+    shape.absarc(cx2, cy2, r2, Math.PI / 2, -Math.PI / 2, true);
+
+    shape.lineTo(cx1, cy1 - r1);
+
+    shape.absarc(cx1, cy1, r1, -Math.PI / 2, Math.PI / 2, true);
+
+    var geometry = new THREE.ExtrudeGeometry(shape,{depth:5, bevelEnabled: false});
+    var material = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide});
+    beltMesh = new THREE.Mesh(geometry, material);
+    beltMesh.position.set(80, 420, 430);  // centré sur le grand cercle = position du servo
+    beltMesh.rotation.z = -(Math.PI*1.3);
+    window.scene.add(beltMesh);    
 
 }
 
@@ -545,10 +633,11 @@ function init() {
 
     camera = new THREE.PerspectiveCamera(30, canvasRatio, 1, 10000);
     cameraControls = new OrbitControls(camera, renderer.domElement);
-    camera.position.set(0, 300, 1500);
+    camera.position.set(0, 500, 1500);
     cameraControls.target.set(0, 43, -8);
 
     // lock camera
+
     cameraControls.enablePan = false;
     cameraControls.maxPolarAngle = Math.PI / 2.3;
     cameraControls.minPolarAngle = Math.PI / 4;
@@ -609,11 +698,10 @@ window.setLedIntensity = function(ledState) {
 
 window.setPompeState = function(pompeState) {
     pumpLedMaterial.color.set(pompeState === 'ON' ? 0x00ff00 : 0xff0000);
-    if (pompeState === 'ON') {
-        waterlevel = Math.max(0, waterlevel - 0.5);  // ✅ never goes below 0
-        waterTube = 0.8;  // ✅ make tube visible when pump is on
+    if (pompeState === 'ON') {  
+        waterTube = 0.8; 
     } else {
-        waterTube = 0;  // ✅ hide tube when pump is off
+        waterTube = 0;  
     }
 };
 
@@ -647,17 +735,25 @@ window.setLumiere = function(newLumiere) {
     if (window.setLCDText) window.setLCDText();
 };
 
+window.setEauStock = function(eauStock) {
+    waterlevel = (eauStock/100)*waterFull;
+};
+
+
 function render() {
     var delta = clock.getDelta();
     cameraControls.update(delta);
 
     if (toitMovible) {
         toitMovible.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.05;
+        if (beltMesh) {
+            beltMesh.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.15;
+        }
     }
 
     if (waterMesh) {
         waterMesh.scale.y = waterlevel / 20;
-        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20);
+        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20)+7;
     }
 
     if (innerPipeMaterial) {

@@ -41,6 +41,8 @@ async function refreshData() {
             updateCard('lockCard', 'Locked : ' + lastData.pompe_lock + 's');
         }
         if (window.setPompeLock) window.setPompeLock(lastData.pompe_lock);
+        updateCard('eauCard', lastData.eau, 'ml');
+        if (window.setEauStock) window.setEauStock(lastData.eau);
 
         const toitBtn = document.getElementById('toitBtn');
         if (toitBtn) {
@@ -179,6 +181,21 @@ async function sendPompeCommand(action) {
     }
 }
 
+async function sendRefillCommand() {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/refill/', {  // ← new endpoint
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({})
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur refill: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 async function sendModeCommand(mode) {
     try {
         var csrftoken = getCookie('csrftoken');
@@ -227,6 +244,7 @@ function initToggle() {
         var toitBtn = document.getElementById('toitBtn');
         var ledBtn = document.getElementById('ledBtn');
         var pompeBtn = document.getElementById('pompeBtn');
+        var refillBtn = document.getElementById('refillBtn');
         if (checkbox.checked) {
             switchEl.classList.add('is-checked');
             if (label) label.textContent = '1';
@@ -301,6 +319,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    var refillBtn = document.getElementById('refillBtn');
+        if (refillBtn) {
+            refillBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                sendRefillCommand();
+            });
+        }       
 
     var deconnexionBtn = document.getElementById('deconnexionBtn');
     if (deconnexionBtn) {

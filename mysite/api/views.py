@@ -236,7 +236,16 @@ def pompe_cmd(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
-
+@api_view(['POST'])
+def refill_cmd(request):
+    log(request.session.get('username', 'inconnu'), 'refill')
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write('refill\n')
+        return Response({'status': 'queued', 'cmd': 'refill'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
 @api_view(['POST'])
 def auto_manuel(request):
     mode = request.data.get('mode')
