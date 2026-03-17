@@ -160,8 +160,8 @@ void loop() {
       pumpStartTime = now;
       digitalWrite(PUMP_RELAY_PIN, HIGH);
       if (eauStock > 0) {
-        eauStock -= pump_debit * (PUMP_ON_TIME / 1000.0);  // Consomme 100 ml par cycle de pompe
-        if (eauStock < 0) eauStock = 0;                    // Ne pas descendre en dessous de 0
+        eauStock -= pump_debit * (PUMP_ON_TIME / 1000.0);  
+        if (eauStock < 0) eauStock = 0;                   
       }
     }
   }
