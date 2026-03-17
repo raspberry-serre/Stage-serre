@@ -231,7 +231,7 @@ void loop() {
     Serial.print("\",");
     Serial.print("\"pump_on_time\":\"");
     Serial.print((PUMP_ON_TIME / 1000));
-    Serial.print("\",");
+    Serial.print("\"");
     Serial.println("}");
   }
 
