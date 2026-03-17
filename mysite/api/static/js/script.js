@@ -58,11 +58,6 @@ async function refreshData() {
             ledBtn.dataset.action = isOn ? 'off' : 'on';
         }
 
-        const refillBtn = document.getElementById('refillBtn');
-        if (refillBtn) {
-           refillBtn.style.display = lastData.pompe_lock == 0 ? 'block' : 'none';
-        }
-
         const ledIndicator = document.querySelector('.status-indicator');
         const ledCard = document.getElementById('ledCard');
         if (ledIndicator && ledCard) {
@@ -256,14 +251,12 @@ function initToggle() {
             if (toitBtn) toitBtn.style.display = 'block';
             if (ledBtn) ledBtn.style.display = 'block';
             if (pompeBtn) pompeBtn.style.display = 'block';
-            if (refillBtn) refillBtn.style.display = 'block';
         } else {
             switchEl.classList.remove('is-checked');
             if (label) label.textContent = '0';
             if (toitBtn) toitBtn.style.display = 'none';
             if (ledBtn) ledBtn.style.display = 'none';
             if (pompeBtn) pompeBtn.style.display = 'none';
-            if (refillBtn) refillBtn.style.display = 'none';
         }
     }
 
