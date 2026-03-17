@@ -112,11 +112,13 @@
             <div class="card" id="eauCard">
                 <div class="card-title">Eau Stock</div>
                 <div class="card-value">-- ml</div>
-                    <button id="refillBtn"
-                        name="commande"
-                        value="refill">
-                        Refill
-                    </button>
+                    {% if request.session.username == "admin" %}
+                        <button id="refillBtn"
+                            name="commande"
+                            value="refill">
+                            Refill
+                        </button>
+                    {%endif%}
                 </div>
             </div>
 <div id="webGL"></div>
