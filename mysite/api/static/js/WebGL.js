@@ -426,7 +426,7 @@ function drawPipe() {
     var curve1 = new THREE.CatmullRomCurve3([
         new THREE.Vector3(60, 242, 420),
         new THREE.Vector3(100, 245, 420),
-        new THREE.Vector3(150, 262, 420),
+        new THREE.Vector3(150, 267, 420),
         new THREE.Vector3(160, 262, 420),
         new THREE.Vector3(162, 240, 420),
     ]);
@@ -464,7 +464,7 @@ function drawPipe() {
 
 function drawWaterTank() {
     var material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false });
-    var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), material);
+    var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 40, 40), material);
     tank.position.set(162, 240, 420);
     tank.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(tank);
