@@ -63,6 +63,7 @@ async function refreshData() {
         if (pompeBtn && modeCheckbox && modeCheckbox.checked) { 
             if (lastData.debit * lastData.pump_on_time > lastData.eau) {
                 pompeBtn.style.display = 'none';
+                sendEauCommande('lowEau');
             } else {
                 pompeBtn.style.display = 'block';
             }
@@ -81,7 +82,7 @@ async function refreshData() {
                 ledCard.classList.add('inactive');
             }
         }
-        console.log('debit:', lastData.debit, 'pump_on_time:', lastData.pump_on_time, 'eau:', lastData.eau);
+
         var errorMsg = document.getElementById('errorMessage');
         if (errorMsg) errorMsg.style.display = 'none';
         updateLastUpdate();
@@ -222,6 +223,21 @@ async function sendModeCommand(mode) {
     } catch (e) {
         var em = document.getElementById('errorMessage');
         if (em) { em.textContent = 'Erreur commande mode: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
+async function sendEauCommande(eau) {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/eau/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({ eau: eau })
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur eau: ' + e.message; em.style.display = 'block'; }
     }
 }
 

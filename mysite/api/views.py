@@ -152,6 +152,20 @@ def logs_api(request):
     ]
     return Response({'logs': log_lines})
 
+@api_view(['POST'])
+def eau_cmd(request):
+    eau = request.data.get('eau')
+    if not eau:
+        return Response({'error': 'missing eau'}, status=400)
+
+    log(request.session.get('username', 'inconnu'), f'eau : {eau}')
+
+    try:
+        with open(CMD_FILE, 'a') as f:
+            f.write(f'{eau}\n')
+        return Response({'status': 'queued', 'cmd': eau})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 def last_serre(request):
