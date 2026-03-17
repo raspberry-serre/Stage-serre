@@ -476,7 +476,7 @@ function drawWaterTank() {
         depthWrite: false 
     });
     waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
-    waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
+    waterMesh.position.set(162, tankBottom + waterlevel+100 / 2, 420);
     waterMesh.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     window.scene.add(waterMesh);
 }
@@ -753,7 +753,7 @@ function render() {
 
     if (waterMesh) {
         waterMesh.scale.y = waterlevel / 20;
-        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20);
+        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20)+7;
     }
 
     if (innerPipeMaterial) {
