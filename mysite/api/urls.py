@@ -13,4 +13,5 @@ urlpatterns = [
     path('new_account/', views.new_account, name='new_account'),
     path('logs/', views.logs, name='logs'),
     path('api/pompe/', views.pompe_cmd, name='pompe_cmd'),
+    path('api/refill/', views.refill_cmd, name='refill_cmd'),
 ]

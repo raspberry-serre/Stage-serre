@@ -186,6 +186,21 @@ async function sendPompeCommand(action) {
     }
 }
 
+async function sendRefillCommand() {
+    try {
+        var csrftoken = getCookie('csrftoken');
+        var resp = await fetch('/api/refill/', {  // ← new endpoint
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken || '' },
+            body: JSON.stringify({})
+        });
+        if (!resp.ok) throw new Error(resp.statusText);
+    } catch (e) {
+        var em = document.getElementById('errorMessage');
+        if (em) { em.textContent = 'Erreur refill: ' + e.message; em.style.display = 'block'; }
+    }
+}
+
 async function sendModeCommand(mode) {
     try {
         var csrftoken = getCookie('csrftoken');
@@ -316,9 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (refillBtn) {
             refillBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                sendPompeCommand('on');
+                sendRefillCommand();
             });
-            var text = (pompeBtn.textContent || '').trim().toLowerCase();
         }       
 
     var deconnexionBtn = document.getElementById('deconnexionBtn');
