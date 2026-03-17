@@ -272,8 +272,10 @@ void loop() {
 
       } else if (cmd == "pompe_on") {
         if (!pumpLocked) {
-          force_pompe = true;  // Forcer la pompe à s'allumer
+          force_pompe = true;  
         }
+      }else if (cmd == "refill") {
+        eauStock = 100;  
       }
 
 
