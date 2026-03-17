@@ -81,7 +81,7 @@ async function refreshData() {
                 ledCard.classList.add('inactive');
             }
         }
-
+        console.log('debit:', lastData.debit, 'pump_on_time:', lastData.pump_on_time, 'eau:', lastData.eau);
         var errorMsg = document.getElementById('errorMessage');
         if (errorMsg) errorMsg.style.display = 'none';
         updateLastUpdate();
