@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from django.core.management.base import BaseCommand
 
-save_folder = './api/management/commands/pictures'
+save_folder = './media/camera'
 INTERVAL = 60  # seconds between pictures
 
 class Command(BaseCommand):

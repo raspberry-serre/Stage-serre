@@ -38,6 +38,109 @@ const tempPosition = new THREE.Vector3();
 
 var splashParticles = [];
 
+var boxGroup   = null;
+var boxButtons = [];
+
+function makeButtonCanvas(label, pressed) {
+    var c = document.createElement('canvas');
+    c.width = 128; c.height = 128;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = pressed ? '#3a5faa' : '#1a1a2e';
+    ctx.beginPath(); ctx.roundRect(4, 4, 120, 120, 16); ctx.fill();
+    ctx.strokeStyle = pressed ? '#ffffff' : '#7eb8ff';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(4, 4, 120, 120, 16); ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 56px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, 64, 68);
+    return new THREE.CanvasTexture(c);
+}
+
+function drawMovableBox() {
+    boxGroup = new THREE.Group();
+    boxGroup.position.set(-250, 310, 530);
+    boxGroup.rotation.y = Math.PI/5;
+    window.scene.add(boxGroup);
+
+    // Main box
+    var box = new THREE.Mesh(
+        new THREE.BoxGeometry(200, 160, 5),
+        new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 80, specular: 0x553311 })
+    );
+    boxGroup.add(box);
+
+    var btnSize = 14;
+    var gap     = 170;   // distance between the two button centers
+    var faceZ   = 5;
+
+    // Both buttons centered: one at -gap/2, one at +gap/2 — symmetric around x=0, y=0
+    var defs = [
+        { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
+        { label: '→', dir: 'right', x:  gap / 2, y: 0 },
+        { label: 'last', dir: 'last', x: 0, y: -60 ,}
+    ];
+
+    defs.forEach(function(def) {
+        var normalTex  = makeButtonCanvas(def.label, false);
+        var pressedTex = makeButtonCanvas(def.label, true);
+        var mat = new THREE.MeshBasicMaterial({ map: normalTex });
+
+        var btn = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), mat);
+        btn.position.set(def.x, def.y, faceZ);
+
+        btn.userData.direction  = def.dir;
+        btn.userData.normalTex  = normalTex;
+        btn.userData.pressedTex = pressedTex;
+        btn.userData.mat        = mat;
+
+        boxGroup.add(btn);
+        boxButtons.push(btn);
+    });
+    
+    var geometry = new THREE.BoxGeometry(150, 112.5,5);   
+    var Textureloader = new THREE.TextureLoader();
+    var screenTexture = new THREE.TextureLoader().load(
+        '/media/camera/photo_latest.jpg'
+    );
+    var material = new THREE.MeshPhongMaterial({ map: screenTexture });
+    var screen = new THREE.Mesh(geometry, material);
+    screen.position.set(0, 10, 2.5);
+    boxGroup.add(screen);
+
+}
+
+var boxRaycaster = new THREE.Raycaster();
+var boxMouse     = new THREE.Vector2();
+
+function initBoxClicks() {
+    renderer.domElement.addEventListener('pointerdown', function(e) {
+        var rect    = renderer.domElement.getBoundingClientRect();
+        boxMouse.x  = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+        boxMouse.y  = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+
+        boxRaycaster.setFromCamera(boxMouse, camera);
+        var hits = boxRaycaster.intersectObjects(boxButtons);
+
+        if (hits.length > 0) {
+            var btn = hits[0].object;
+            var dir = btn.userData.direction;
+
+            // Visual press feedback
+            btn.userData.mat.map = btn.userData.pressedTex;
+            btn.userData.mat.needsUpdate = true;
+            btn.scale.setScalar(0.88);
+
+            setTimeout(function() {
+                btn.userData.mat.map = btn.userData.normalTex;
+                btn.userData.mat.needsUpdate = true;
+                btn.scale.setScalar(1.0);
+            }, 180);
+        }
+    });
+}
+
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
     light.position.set(-1300, 700, 1240);
@@ -67,6 +170,7 @@ function fillScene() {
     drawWaterDrops();
     drawLCD();
     drawServo();
+    drawMovableBox();
 }
 
 function drawTable() {
@@ -561,14 +665,14 @@ function drawLCD(){
         new THREE.BoxGeometry(120, 20, 10),
         material
     );
-    lcdScreen.position.set(-80, 340, 455);
+    lcdScreen.position.set(-80, 360, 455);
     window.scene.add(lcdScreen); 
 
     var lcdBack = new THREE.Mesh(
         new THREE.BoxGeometry(135, 35, 5),
         new THREE.MeshPhongMaterial({ color: 0x006600 })
     );
-    lcdBack.position.set(-80, 340, 450);
+    lcdBack.position.set(-80, 360, 450);
     window.scene.add(lcdBack);
 
     window.setLCDText = function() {
@@ -841,6 +945,7 @@ try {
     fillScene();
     addToDOM();
     animate();
+    initBoxClicks();
 } catch(e) {
     console.error("WebGL error:", e);
 }
