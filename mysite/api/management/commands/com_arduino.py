@@ -53,7 +53,9 @@ class Command(BaseCommand):
                                 pompe=data.get('pompe', 'OFF'),
                                 led=data.get('led', 'OFF'),
                                 pompe_lock=data.get('pompe_lock', 0),
-                                eau=data.get('eau', 0)
+                                eau=data.get('eau', 0),
+                                pump_on_time=data.get('pump_on_time', 0.0),
+                                debit=data.get('debit', 0.0)
                             )
                             # ---------------- CLEANUP OLD RECORDS ----------------
                             total = Serre.objects.count()
