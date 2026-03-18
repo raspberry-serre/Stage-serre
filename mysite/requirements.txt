@@ -1,3 +1,4 @@
 django
 djangorestframework
 pyserial
+Opencv-python
