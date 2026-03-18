@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 save_folder = './media/camera'
-INTERVAL = 60  # seconds between pictures
+INTERVAL = 60
 
 class Command(BaseCommand):
     help = 'Take a picture from webcam every X minutes'
@@ -12,19 +12,17 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         while True:
             cap = cv2.VideoCapture(0)
-
-            # warm up: discard first few frames
             for _ in range(5):
                 cap.read()
-
             ret, frame = cap.read()
             if ret:
+                # save timestamped archive
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                filename = f'{save_folder}/photo_{timestamp}.jpg'
-                cv2.imwrite(filename, frame)
-                self.stdout.write(f'Saved: {filename}')
+                cv2.imwrite(f'{save_folder}/photo_{timestamp}.jpg', frame)
+                # save latest for WebGL
+                cv2.imwrite(f'{save_folder}/photo_latest.jpg', frame)
+                self.stdout.write(f'Saved: photo_{timestamp}.jpg')
             else:
                 self.stdout.write('Failed to capture')
-
-            cap.release()  # release between shots
+            cap.release()
             time.sleep(INTERVAL)
