@@ -72,14 +72,13 @@ function drawMovableBox() {
     boxGroup.add(box);
 
     var btnSize = 14;
-    var gap     = 170;   // distance between the two button centers
+    var gap     = 170;
     var faceZ   = 5;
 
-    // Both buttons centered: one at -gap/2, one at +gap/2 — symmetric around x=0, y=0
     var defs = [
         { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
         { label: '→', dir: 'right', x:  gap / 2, y: 0 },
-        { label: 'last', dir: 'last', x: 0, y: -60 ,}
+        { label: 'last', dir: 'last', x: 0, y: -60 }
     ];
 
     defs.forEach(function(def) {
@@ -98,9 +97,8 @@ function drawMovableBox() {
         boxGroup.add(btn);
         boxButtons.push(btn);
     });
-    
-    var geometry = new THREE.BoxGeometry(150, 112.5,5);   
-    var Textureloader = new THREE.TextureLoader();
+
+    var geometry = new THREE.BoxGeometry(150, 112.5, 5);
     var screenTexture = new THREE.TextureLoader().load(
         '/media/camera/photo_latest.jpg'
     );
@@ -109,9 +107,28 @@ function drawMovableBox() {
     screen.position.set(0, 10, 2.5);
     boxGroup.add(screen);
 
+    function scheduleHourlyReload() {
+        var now = new Date();
+        var msUntilNextHour = (60 - now.getMinutes()) * 60000 - now.getSeconds() * 1000 + 4000;
+
+        setTimeout(function() {
+            new THREE.TextureLoader().load(
+                '/media/camera/photo_latest.jpg?t=' + Date.now(),
+                function(newTexture) {
+                    material.map = newTexture;
+                    material.needsUpdate = true;
+                    screenTexture.dispose();
+                    screenTexture = newTexture;
+                }
+            );
+            scheduleHourlyReload();
+        }, msUntilNextHour);
+    }
+
+    scheduleHourlyReload();
 }
 
-var boxRaycaster = new THREE.Raycaster();
+var boxRaycaster = new THREE.Raycaster();   
 var boxMouse     = new THREE.Vector2();
 
 function initBoxClicks() {
