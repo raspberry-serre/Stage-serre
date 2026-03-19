@@ -2,6 +2,7 @@ import cv2
 import time
 from datetime import datetime
 from django.core.management.base import BaseCommand
+from api.models import Photo
 
 save_folder = './media/camera'
 INTERVAL = 3600
@@ -18,10 +19,17 @@ class Command(BaseCommand):
             if ret:
 
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                cv2.imwrite(f'{save_folder}/photo_{timestamp}.jpg', frame)
+                cv2.imwrite(f'{save_folder}/{timestamp}.jpg', frame)
+
+                try:
+                    Photo.objects.create(
+                        path=f'/media/camera/{timestamp}.jpg'
+                    )
+                except Exception as e:
+                    print(f"[ERROR] Failed to log action: {e}")
 
                 cv2.imwrite(f'{save_folder}/photo_latest.jpg', frame)
-                self.stdout.write(f'Saved: photo_{timestamp}.jpg')
+                self.stdout.write(f'Saved: {timestamp}.jpg')
             else:
                 self.stdout.write('Failed to capture')
             cap.release()
