@@ -34,3 +34,9 @@ class Logs(models.Model):
 
     def __str__(self):
         return f"Log {self.username}: {self.id}: {self.action}"
+
+class Photo(models.Model):
+    path = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f'Photo {self.id}'

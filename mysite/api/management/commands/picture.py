@@ -16,10 +16,10 @@ class Command(BaseCommand):
                 cap.read()
             ret, frame = cap.read()
             if ret:
-                # save timestamped archive
+
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
                 cv2.imwrite(f'{save_folder}/photo_{timestamp}.jpg', frame)
-                # save latest for WebGL
+
                 cv2.imwrite(f'{save_folder}/photo_latest.jpg', frame)
                 self.stdout.write(f'Saved: photo_{timestamp}.jpg')
             else:
