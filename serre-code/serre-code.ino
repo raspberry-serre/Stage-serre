@@ -126,14 +126,18 @@ void loop() {
         servoAttached = true;
       }
     }
+    if(isDay){}
+      if (lightValue < 300) {
 
-    if (isDay == true && lightValue < 300) {
+        digitalWrite(LIGHT_RELAY_PIN, HIGH);
+        LED_ON = true;
 
-      digitalWrite(LIGHT_RELAY_PIN, HIGH);
-      LED_ON = true;
+      } else if (lightValue > 690) {
 
-    } else if (lightValue > 690) {
-
+        digitalWrite(LIGHT_RELAY_PIN, LOW);
+        LED_ON = false;
+      }
+    }else{
       digitalWrite(LIGHT_RELAY_PIN, LOW);
       LED_ON = false;
     }
@@ -260,7 +264,7 @@ void loop() {
       } else if (cmd.startsWith("TIME:")) {
         int hour = cmd.substring(5).toInt();
         hour++;
-        if (hour < 7 || hour >= 20) {
+        if (hour < 10 || hour >= 20) {
           isDay = false;
         } else {
           isDay = true;
