@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 save_folder = './media/camera'
-INTERVAL = 60
+INTERVAL = 3600
 
 class Command(BaseCommand):
     help = 'Take a picture from webcam every X minutes'
