@@ -111,22 +111,23 @@ void loop() {
   /* ===== AUTO MODE =====*/
   if (Mode) {
     /* ===== SERVO AUTO ===== */
-    if (temp > 40) {
-      servoTarget = 180;
-      if (!servoAttached) {
-        servo.attach(SERVO_PIN);
-        servoAttached = true;
+    if (isDay) {
+      if (temp > 40) {
+        servoTarget = 180;
+        if (!servoAttached) {
+          servo.attach(SERVO_PIN);
+          servoAttached = true;
+        }
       }
-    }
 
-    if (temp < 15) {
-      servoTarget = 110;
-      if (!servoAttached) {
-        servo.attach(SERVO_PIN);
-        servoAttached = true;
+      if (temp < 15) {
+        servoTarget = 110;
+        if (!servoAttached) {
+          servo.attach(SERVO_PIN);
+          servoAttached = true;
+        }
       }
-    }
-    if(isDay){}
+
       if (lightValue < 300) {
 
         digitalWrite(LIGHT_RELAY_PIN, HIGH);
@@ -137,11 +138,17 @@ void loop() {
         digitalWrite(LIGHT_RELAY_PIN, LOW);
         LED_ON = false;
       }
-    }else{
+    } else {
       digitalWrite(LIGHT_RELAY_PIN, LOW);
       LED_ON = false;
+      servoTarget = 110;
+      if (!servoAttached) {
+        servo.attach(SERVO_PIN);
+        servoAttached = true;
+      }
     }
   }
+
   /* ====== POMPE ====== */
 
   // ----- HANDLE LOCK COUNTDOWN -----
@@ -164,20 +171,20 @@ void loop() {
       pumpStartTime = now;
       digitalWrite(PUMP_RELAY_PIN, HIGH);
       if (eauStock > 0) {
-        eauStock -= pump_debit * (PUMP_ON_TIME / 1000.0);  
-        if (eauStock < 0) eauStock = 0;                   
+        eauStock -= pump_debit * (PUMP_ON_TIME / 1000.0);
+        if (eauStock < 0) eauStock = 0;
       }
     }
   }
-    // ----- STOP PUMP AFTER ON TIME -----
-    if (pumpRunning && now - pumpStartTime >= PUMP_ON_TIME) {
-      pumpRunning = false;
-      pumpLocked = true;
-      pumpLockStartTime = now;
-      force_pompe = false;
-      digitalWrite(PUMP_RELAY_PIN, LOW);
-    }
-  
+  // ----- STOP PUMP AFTER ON TIME -----
+  if (pumpRunning && now - pumpStartTime >= PUMP_ON_TIME) {
+    pumpRunning = false;
+    pumpLocked = true;
+    pumpLockStartTime = now;
+    force_pompe = false;
+    digitalWrite(PUMP_RELAY_PIN, LOW);
+  }
+
 
   lcd.setCursor(0, 1);
   lcd.print(soilValue);
@@ -263,8 +270,7 @@ void loop() {
         }
       } else if (cmd.startsWith("TIME:")) {
         int hour = cmd.substring(5).toInt();
-        hour++;
-        if (hour < 10 || hour >= 20) {
+        if (hour < 7 || hour >= 20) {
           isDay = false;
         } else {
           isDay = true;
