@@ -10,8 +10,8 @@ migrate.wait()
 
 arduino = subprocess.Popen([sys.executable, "manage.py", "com_arduino"])
 django = subprocess.Popen([sys.executable, "manage.py", "runserver", "0.0.0.0:8000"])
-picture = subprocess.Popen([sys.executable, "manage.py", "picture"])
+#picture = subprocess.Popen([sys.executable, "manage.py", "picture"])
 
 django.wait()
 arduino.terminate()
-picture.terminate()
+#picture.terminate()
