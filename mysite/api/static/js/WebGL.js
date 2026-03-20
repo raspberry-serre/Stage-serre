@@ -41,7 +41,9 @@ var boxGroup   = null;
 var tableGroup = null;
 var serreGroup = null;
 var Buttons = [];
-
+var boxGroupTargetZ = -530; 
+var boxGroupTargetX = -250; 
+var boxGroupTargetY = 310;
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -287,6 +289,7 @@ function drawLED() {
         serreGroup.add(led);
     });
 }
+
 function drawPot() {
     var Textureloader = new THREE.TextureLoader();
     var sideTexture = Textureloader.load('/static/js/texture/pot.jpg');
@@ -325,7 +328,8 @@ function drawPot() {
 
     var rim = new THREE.Mesh(rimGeometry, rimMaterial);
 
-
+    // Position rim sitting on top of the pot
+    // Pot height is 70, so top face is at potPosition.y + 35
     rim.position.set(potPosition.x, potPosition.y + 35, potPosition.z);
 
     serreGroup.add(rim);
@@ -773,6 +777,13 @@ function initBoxClicks() {
                 btn.userData.mat.needsUpdate = true;
                 btn.scale.setScalar(1.0);
             }, 180);
+
+            if (dir === 'Photo') {
+                var isOut = boxGroupTargetZ === -530;
+                boxGroupTargetX = isOut ? 100  : -250;  
+                boxGroupTargetY = isOut ? 310  :  310;  
+                boxGroupTargetZ = isOut ? 530  : -530;
+            }
         }
     });
 }
@@ -830,6 +841,7 @@ var ledLightPosition = [
     { x: -100, y: 430, z: 310 },
     { x: -100, y: 430, z: 390 }
 ];
+
 function drawLedLights() {
     ledLightPosition.forEach(pos => {
         var light = new THREE.SpotLight(0xFF0000, 0);
@@ -913,6 +925,13 @@ function render() {
         if (beltMesh) {
             beltMesh.rotation.z += (toitTargetAngle - toitMovible.rotation.z) * 0.15;
         }
+    }
+
+
+    if (boxGroup) {
+    boxGroup.position.x += (boxGroupTargetX - boxGroup.position.x) * 0.05;
+    boxGroup.position.y += (boxGroupTargetY - boxGroup.position.y) * 0.05;
+    boxGroup.position.z += (boxGroupTargetZ - boxGroup.position.z) * 0.05;
     }
 
     if (waterMesh) {
