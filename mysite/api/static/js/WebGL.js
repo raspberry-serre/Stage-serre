@@ -41,9 +41,11 @@ var boxGroup   = null;
 var tableGroup = null;
 var serreGroup = null;
 var Buttons = [];
-var boxGroupTargetZ = -530; 
-var boxGroupTargetX = -250; 
+var boxGroupTargetZ = -530;
+var boxGroupTargetX = -250;
 var boxGroupTargetY = 310;
+var boxGroupTargetRotX = Math.PI/2; 
+
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -684,7 +686,7 @@ function drawServo(){
 function drawMovableBox() {
     boxGroup = new THREE.Group();
     boxGroup.position.set(-250, 310, -530);
-    boxGroup.rotation.y = Math.PI/5;
+    boxGroup.rotation.x = Math.PI/2;
     window.scene.add(boxGroup);
 
     // Main box
@@ -779,10 +781,17 @@ function initBoxClicks() {
             }, 180);
 
             if (dir === 'Photo') {
-                var isOut = boxGroupTargetZ === -530;
-                boxGroupTargetX = isOut ? 100  : -250;  
-                boxGroupTargetY = isOut ? 310  :  310;  
-                boxGroupTargetZ = isOut ? 530  : -530;
+                var isOut = boxGroupTargetZ === -530;  // true = currently hidden, moving to visible
+                boxGroupTargetX    = isOut ?  -250       : -250;        // x: visible vs hidden
+                boxGroupTargetY    = isOut ?  310       :  310;        // y: same (change if needed)
+                boxGroupTargetZ    = isOut ?  530       : -530;        // z: visible vs hidden
+                boxGroupTargetRotX = isOut ? 0 : Math.PI / 2;  // rotation: flip to face camera
+                if (isOut) {
+                    boxGroup.rotation.x = 100;
+                    boxGroupTargetRotX = 0;
+                } else {
+                    boxGroupTargetRotX = Math.PI / 2;
+                }
             }
         }
     });
@@ -927,11 +936,12 @@ function render() {
         }
     }
 
-
     if (boxGroup) {
-    boxGroup.position.x += (boxGroupTargetX - boxGroup.position.x) * 0.05;
-    boxGroup.position.y += (boxGroupTargetY - boxGroup.position.y) * 0.05;
-    boxGroup.position.z += (boxGroupTargetZ - boxGroup.position.z) * 0.05;
+        var speed = 0.02;
+        boxGroup.position.x   += (boxGroupTargetX    - boxGroup.position.x)   * speed;
+        boxGroup.position.y   += (boxGroupTargetY    - boxGroup.position.y)   * speed;
+        boxGroup.position.z   += (boxGroupTargetZ    - boxGroup.position.z)   * speed;
+        boxGroup.rotation.x   += (boxGroupTargetRotX - boxGroup.rotation.x)   * speed;  
     }
 
     if (waterMesh) {
