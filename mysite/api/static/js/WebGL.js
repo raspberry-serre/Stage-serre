@@ -685,7 +685,7 @@ function drawServo(){
 
 function drawMovableBox() {
     boxGroup = new THREE.Group();
-    boxGroup.position.set(0, 10, 0);
+    boxGroup.position.set(0, 610, 0);
     boxGroup.rotation.x = Math.PI/2;
     window.scene.add(boxGroup);
 
@@ -700,12 +700,15 @@ function drawMovableBox() {
     );
     boxGroup.add(box);
 
-    // Front face: photo screen
-    var screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
-    var screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
-    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
-    screen.position.set(0, 10, faceZ);
-    boxGroup.add(screen);
+
+    var frontScreen = new THREE.Mesh(
+        new THREE.BoxGeometry(150, 112.5, 1),
+        new THREE.MeshPhongMaterial({ color: 0x000000 })
+    );
+    frontScreen.position.set(0, 10, faceZ);
+    frontScreen.rotation.y = Math.PI;
+    boxGroup.add(frontScreen);
+    
 
     // Front face: navigation buttons
     var navDefs = [
@@ -728,14 +731,31 @@ function drawMovableBox() {
         Buttons.push(btn);
     });
 
-    // Back face: black screen
-    var backScreen = new THREE.Mesh(
-        new THREE.BoxGeometry(150, 112.5, 1),
-        new THREE.MeshPhongMaterial({ color: 0x000000 })
-    );
-    backScreen.position.set(0, 10, -faceZ);
-    backScreen.rotation.y = Math.PI;
-    boxGroup.add(backScreen);
+
+var screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+var screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
+var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
+screen.position.set(0, 10, -faceZ);
+boxGroup.add(screen);
+
+// ← auto reload every hour
+function scheduleHourlyReload() {
+    var now = new Date();
+    var msUntilNext = 10 * 60 * 1000+1000;  // 10 minutes and 1 second in milliseconds
+    setTimeout(function() {
+        new THREE.TextureLoader().load(
+            '/media/camera/photo_latest.jpg?t=' + Date.now(),
+            function(newTexture) {
+                screenMaterial.map = newTexture;
+                screenMaterial.needsUpdate = true;
+                screenTexture.dispose();
+                screenTexture = newTexture;
+            }
+        );
+        scheduleHourlyReload();
+    }, msUntilNext);
+}
+scheduleHourlyReload();
 
     // Back face: scroll button (flips back to front)
     var normalTexB  = makeButtonCanvas('scroll', false);
