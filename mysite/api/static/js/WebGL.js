@@ -41,10 +41,11 @@ var boxGroup   = null;
 var tableGroup = null;
 var serreGroup = null;
 var Buttons = [];
-var boxGroupTargetZ = -530;
-var boxGroupTargetX = -250;
-var boxGroupTargetY = 310;
-var boxGroupTargetRotX = Math.PI/2; 
+var boxGroupTargetZ = 0;
+var boxGroupTargetX = 0;
+var boxGroupTargetY = 610;
+var boxGroupTargetRotX = Math.PI/2;
+var boxGroupTargetRotY = 0;
 
 
 function fillScene() {
@@ -118,7 +119,6 @@ function drawTable() {
         // leg.receiveShadow = true; // shadow_code
         tableGroup.add(leg);
     });
-
 
     var face   = 5;
 
@@ -308,7 +308,6 @@ function drawPot() {
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
     serreGroup.add(pot);
 
-  
     const outerRadius = 42;  
     const innerRadius = 38;  
     const height = 8;       
@@ -365,22 +364,23 @@ function drawPlant() {
        side: THREE.DoubleSide,
     });
 
-const petalCount = 15;
-for (let i = 0; i < petalCount; i++) {
-    const angle = (i / petalCount) * Math.PI * 2;
+    const petalCount = 15;
+    for (let i = 0; i < petalCount; i++) {
+        const angle = (i / petalCount) * Math.PI * 2;
 
-    // Pivot sits at the center top of the stem
-    const pivot = new THREE.Object3D();
-    pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
-    pivot.rotation.y = angle; // ← handles radial direction
+        // Pivot sits at the center top of the stem
+        const pivot = new THREE.Object3D();
+        pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
+        pivot.rotation.y = angle; // ← handles radial direction
 
-    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
-    petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
-    petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
+        const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+        petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
+        petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
 
-    pivot.add(petal);
-    serreGroup.add(pivot);
-}
+        pivot.add(petal);
+        serreGroup.add(pivot);
+    }
+
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
     var bottomLeafsLocation = [
@@ -685,9 +685,13 @@ function drawServo(){
 
 function drawMovableBox() {
     boxGroup = new THREE.Group();
-    boxGroup.position.set(-250, 310, -530);
+    boxGroup.position.set(0, 10, 0);
     boxGroup.rotation.x = Math.PI/2;
     window.scene.add(boxGroup);
+
+    var btnSize = 14;
+    var gap     = 170;
+    var faceZ   = 3.5;
 
     // Main box
     var box = new THREE.Mesh(
@@ -696,61 +700,56 @@ function drawMovableBox() {
     );
     boxGroup.add(box);
 
-    var btnSize = 14;
-    var gap     = 170;
-    var faceZ   = 5;
+    // Front face: photo screen
+    var screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    var screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
+    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
+    screen.position.set(0, 10, faceZ);
+    boxGroup.add(screen);
 
-    var defs = [
+    // Front face: navigation buttons
+    var navDefs = [
         { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
         { label: '→', dir: 'right', x:  gap / 2, y: 0 },
         { label: 'last', dir: 'last', x: 0, y: -60 }
     ];
 
-    defs.forEach(function(def) {
+    navDefs.forEach(function(def) {
         var normalTex  = makeButtonCanvas(def.label, false);
         var pressedTex = makeButtonCanvas(def.label, true);
         var mat = new THREE.MeshBasicMaterial({ map: normalTex });
-
         var btn = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), mat);
         btn.position.set(def.x, def.y, faceZ);
-
         btn.userData.direction  = def.dir;
         btn.userData.normalTex  = normalTex;
         btn.userData.pressedTex = pressedTex;
         btn.userData.mat        = mat;
-
         boxGroup.add(btn);
         Buttons.push(btn);
     });
 
-    var geometry = new THREE.BoxGeometry(150, 112.5, 5);
-    var screenTexture = new THREE.TextureLoader().load(
-        '/media/camera/photo_latest.jpg'
+    // Back face: black screen
+    var backScreen = new THREE.Mesh(
+        new THREE.BoxGeometry(150, 112.5, 1),
+        new THREE.MeshPhongMaterial({ color: 0x000000 })
     );
-    var material = new THREE.MeshPhongMaterial({ map: screenTexture });
-    var screen = new THREE.Mesh(geometry, material);
-    screen.position.set(0, 10, 2.5);
-    boxGroup.add(screen);
+    backScreen.position.set(0, 10, -faceZ);
+    backScreen.rotation.y = Math.PI;
+    boxGroup.add(backScreen);
 
-    function scheduleHourlyReload() {
-        var now = new Date();
-        var msUntilNextHour = (60 - now.getMinutes()) * 60000 - now.getSeconds() * 1000 + 4000;
-
-        setTimeout(function() {
-            new THREE.TextureLoader().load(
-                '/media/camera/photo_latest.jpg?t=' + Date.now(),
-                function(newTexture) {
-                    material.map = newTexture;
-                    material.needsUpdate = true;
-                    screenTexture.dispose();
-                    screenTexture = newTexture;
-                }
-            );
-            scheduleHourlyReload();
-        }, msUntilNextHour);
-    }
-
-    scheduleHourlyReload();
+    // Back face: scroll button (flips back to front)
+    var normalTexB  = makeButtonCanvas('scroll', false);
+    var pressedTexB = makeButtonCanvas('scroll', true);
+    var matB = new THREE.MeshBasicMaterial({ map: normalTexB });
+    var btnBack = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matB);
+    btnBack.position.set(0, -60, -faceZ);
+    btnBack.rotation.y = Math.PI;
+    btnBack.userData.direction  = 'scroll';
+    btnBack.userData.normalTex  = normalTexB;
+    btnBack.userData.pressedTex = pressedTexB;
+    btnBack.userData.mat        = matB;
+    boxGroup.add(btnBack);
+    Buttons.push(btnBack);
 }
 
 var boxRaycaster = new THREE.Raycaster();   
@@ -781,17 +780,41 @@ function initBoxClicks() {
             }, 180);
 
             if (dir === 'Photo') {
-                var isOut = boxGroupTargetZ === -530;  // true = currently hidden, moving to visible
-                boxGroupTargetX    = isOut ?  -250       : -250;        // x: visible vs hidden
-                boxGroupTargetY    = isOut ?  310       :  310;        // y: same (change if needed)
-                boxGroupTargetZ    = isOut ?  530       : -530;        // z: visible vs hidden
-                boxGroupTargetRotX = isOut ? 0 : Math.PI / 2;  // rotation: flip to face camera
+                var isOut = boxGroupTargetZ === 0;  // true = currently hidden, moving to visible
+                boxGroupTargetX    = isOut ?  0    : 0;
+                boxGroupTargetY    = isOut ?  610  : 610;
+                boxGroupTargetZ    = isOut ?  430  : 0;
+                camera.position.x = 0;
+                camera.position.y = 0;
+                camera.position.z = 600;
+                cameraControls.target.set(0, 510, 0);
+                cameraControls.enablePan = false;
+                cameraControls.enableRotate = false;
+                cameraControls.enableZoom = false;
                 if (isOut) {
-                    boxGroup.rotation.x = 100;
+                    boxGroup.rotation.x = 20;
                     boxGroupTargetRotX = 0;
                 } else {
                     boxGroupTargetRotX = Math.PI / 2;
                 }
+            }
+
+            if (dir === 'last') {
+                // flip to back face
+                boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir === 'scroll') {
+                // flip back to front face
+                boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir === 'left') {
+                // handle left navigation
+            }
+
+            if (dir === 'right') {
+                // handle right navigation
             }
         }
     });
@@ -941,7 +964,8 @@ function render() {
         boxGroup.position.x   += (boxGroupTargetX    - boxGroup.position.x)   * speed;
         boxGroup.position.y   += (boxGroupTargetY    - boxGroup.position.y)   * speed;
         boxGroup.position.z   += (boxGroupTargetZ    - boxGroup.position.z)   * speed;
-        boxGroup.rotation.x   += (boxGroupTargetRotX - boxGroup.rotation.x)   * speed;  
+        boxGroup.rotation.x   += (boxGroupTargetRotX - boxGroup.rotation.x)   * speed;
+        boxGroup.rotation.y   += (boxGroupTargetRotY - boxGroup.rotation.y)   * (speed*10);
     }
 
     if (waterMesh) {
