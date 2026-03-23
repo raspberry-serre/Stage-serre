@@ -36,7 +36,8 @@ class Logs(models.Model):
         return f"Log {self.username}: {self.id}: {self.action}"
 
 class Photo(models.Model):
-    path = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='camera/')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Photo {self.id}'
+        return f"Photo {self.id}"

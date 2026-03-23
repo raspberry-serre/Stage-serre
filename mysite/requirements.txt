@@ -2,3 +2,4 @@ django
 djangorestframework
 pyserial
 Opencv-python
+Pillow

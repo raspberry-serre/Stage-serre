@@ -1,10 +1,12 @@
 import cv2
 import time
 from datetime import datetime
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from api.models import Photo
+from django.core.files import File
 
-save_folder = './media/camera'
+save_folder = settings.MEDIA_ROOT / 'camera'
 INTERVAL = 3597 # seconds (10 minutes - 3 seconds for processing)
 ZOOM = 2.5  # ← 1.0 = no zoom, 1.5 = 50% zoom, 2.0 = 2x zoom
 
@@ -48,10 +50,12 @@ class Command(BaseCommand):
                     cv2.imwrite(f'{save_folder}/{timestamp}.jpg', frame)
                     cv2.imwrite(f'{save_folder}/photo_latest.jpg', frame)
                     try:
-                        Photo.objects.create(path=f'/media/camera/{timestamp}.jpg')
+                        with open(f'{save_folder}/{timestamp}.jpg', 'rb') as f:
+                            django_file = File(f, name=f"{timestamp}.jpg")
+                            Photo.objects.create(image=django_file)
+
                     except Exception as e:
-                        print(f"[ERROR] Failed to log action: {e}")
-                    self.stdout.write(f'Saved: {timestamp}.jpg')
+                        print(f"[ERROR] Failed to save photo: {e}")
                 else:
                     self.stdout.write('Failed to capture')
             time.sleep(INTERVAL)

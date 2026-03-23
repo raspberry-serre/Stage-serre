@@ -50,6 +50,12 @@ var boxGroupTargetRotY = 0;
 var screenTexture = null;
 var screenMaterial = null;
 
+var photoList = [];
+var photoIndex = 0;
+var screenTextureBack = null;
+var screenMaterialBack = null;
+
+
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -542,7 +548,7 @@ function drawWaterTank() {
         depthWrite: false 
     });
     waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
-    waterMesh.position.set(162, tankBottom + waterlevel+100 / 2, 420);
+    waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
     waterMesh.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
     serreGroup.add(waterMesh);
 }
@@ -703,11 +709,13 @@ function drawMovableBox() {
     );
     boxGroup.add(box);
 
-
+    screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
     var frontScreen = new THREE.Mesh(
         new THREE.BoxGeometry(150, 112.5, 1),
-        new THREE.MeshPhongMaterial({ color: 0x000000 })
+        screenMaterial
     );
+
     frontScreen.position.set(0, 10, faceZ);
     frontScreen.rotation.y = Math.PI;
     boxGroup.add(frontScreen);
@@ -735,9 +743,9 @@ function drawMovableBox() {
     });
 
 
-    screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
-    screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
-    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
+    screenTextureBack = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    screenMaterialBack = new THREE.MeshPhongMaterial({ map: screenTextureBack });
+    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterialBack);
     screen.position.set(0, 10, -faceZ);
     boxGroup.add(screen);
 
@@ -791,6 +799,23 @@ function drawMovableBox() {
 
 var boxRaycaster = new THREE.Raycaster();   
 var boxMouse     = new THREE.Vector2();
+
+function loadPhotoAtIndex(i) {
+    if (!photoList || photoList.length === 0) return;
+
+    photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
+
+    var url = photoList[photoIndex] + '?t=' + Date.now();
+
+    var old = screenTexture;
+    new THREE.TextureLoader().load(url, function(newTexture) {
+        screenMaterial.map = newTexture;
+        screenMaterial.needsUpdate = true;
+        if (old) old.dispose();
+        screenTexture = newTexture;
+    });
+}
+
 
 function initBoxClicks() {
     renderer.domElement.addEventListener('pointerdown', function(e) {
@@ -862,10 +887,12 @@ function initBoxClicks() {
 
             if (dir === 'left') {
                 // handle left navigation
-            }
+                loadPhotoAtIndex(photoIndex - 1);
+            }   
 
             if (dir === 'right') {
                 // handle right navigation
+                loadPhotoAtIndex(photoIndex + 1);
             }
         }
     });
@@ -1021,7 +1048,7 @@ function render() {
 
     if (waterMesh) {
         waterMesh.scale.y = waterlevel / 20;
-        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20)+7;
+        waterMesh.position.y = tankBottom + waterlevel / 2;
     }
 
     if (innerPipeMaterial) {
@@ -1107,6 +1134,12 @@ function render() {
 try {
     init();
     fillScene();
+    fetch('/api/photos/')
+    .then(r => r.json())
+    .then(data => {
+        photoList = data.photos;
+        photoIndex = 0;
+    });
     addToDOM();
     animate();
     initBoxClicks();
