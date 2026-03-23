@@ -47,6 +47,9 @@ var boxGroupTargetY = 610;
 var boxGroupTargetRotX = Math.PI/2;
 var boxGroupTargetRotY = 0;
 
+var screenTexture = null;
+var screenMaterial = null;
+
 
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
@@ -732,37 +735,37 @@ function drawMovableBox() {
     });
 
 
-var screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
-var screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
-var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
-screen.position.set(0, 10, -faceZ);
-boxGroup.add(screen);
+    screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
+    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterial);
+    screen.position.set(0, 10, -faceZ);
+    boxGroup.add(screen);
 
-// ← auto reload every hour
-function scheduleHourlyReload() {
-    var now = new Date();
-    var msUntilNext = 10 * 60 * 1000+1000;  // 10 minutes and 1 second in milliseconds
-    setTimeout(function() {
-        new THREE.TextureLoader().load(
-            '/media/camera/photo_latest.jpg?t=' + Date.now(),
-            function(newTexture) {
-                screenMaterial.map = newTexture;
-                screenMaterial.needsUpdate = true;
-                screenTexture.dispose();
-                screenTexture = newTexture;
-            }
-        );
-        scheduleHourlyReload();
-    }, msUntilNext);
-}
-scheduleHourlyReload();
+    // ← auto reload every 10 minutes
+    function scheduleHourlyReload() {
+        var msUntilNext = 10 * 60 * 1000 + 1000;  // 10 minutes and 1 second in milliseconds
+        setTimeout(function() {
+            var old = screenTexture;
+            new THREE.TextureLoader().load(
+                '/media/camera/photo_latest.jpg?t=' + Date.now(),
+                function(newTexture) {
+                    screenMaterial.map = newTexture;
+                    screenMaterial.needsUpdate = true;
+                    old.dispose();
+                    screenTexture = newTexture;
+                }
+            );
+            scheduleHourlyReload();
+        }, msUntilNext);
+    }
+    scheduleHourlyReload();
 
     // Back face: scroll button (flips back to front)
     var normalTexB  = makeButtonCanvas('scroll', false);
     var pressedTexB = makeButtonCanvas('scroll', true);
     var matB = new THREE.MeshBasicMaterial({ map: normalTexB });
     var btnBack = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matB);
-    btnBack.position.set(0, -60, -faceZ);
+    btnBack.position.set(40, -60, -faceZ);
     btnBack.rotation.y = Math.PI;
     btnBack.userData.direction  = 'scroll';
     btnBack.userData.normalTex  = normalTexB;
@@ -770,6 +773,20 @@ scheduleHourlyReload();
     btnBack.userData.mat        = matB;
     boxGroup.add(btnBack);
     Buttons.push(btnBack);
+
+    // Back face: reload button
+    var normalTexR  = makeButtonCanvas('reload', false);
+    var pressedTexR = makeButtonCanvas('reload', true);
+    var matR = new THREE.MeshBasicMaterial({ map: normalTexR });
+    var btnReload = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matR);
+    btnReload.position.set(-40, -60, -faceZ);
+    btnReload.rotation.y = Math.PI;
+    btnReload.userData.direction  = 'reload';
+    btnReload.userData.normalTex  = normalTexR;
+    btnReload.userData.pressedTex = pressedTexR;
+    btnReload.userData.mat        = matR;
+    boxGroup.add(btnReload);
+    Buttons.push(btnReload);
 }
 
 var boxRaycaster = new THREE.Raycaster();   
@@ -827,6 +844,20 @@ function initBoxClicks() {
             if (dir === 'scroll') {
                 // flip back to front face
                 boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir === 'reload') {
+                // reload the latest photo texture
+                var old = screenTexture;
+                new THREE.TextureLoader().load(
+                    '/media/camera/photo_latest.jpg?t=' + Date.now(),
+                    function(newTexture) {
+                        screenMaterial.map = newTexture;
+                        screenMaterial.needsUpdate = true;
+                        old.dispose();
+                        screenTexture = newTexture;
+                    }
+                );
             }
 
             if (dir === 'left') {
