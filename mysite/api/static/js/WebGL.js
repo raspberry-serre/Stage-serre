@@ -725,7 +725,8 @@ function drawMovableBox() {
     var navDefs = [
         { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
         { label: '→', dir: 'right', x:  gap / 2, y: 0 },
-        { label: 'last', dir: 'last', x: 0, y: -60 }
+        { label: 'last', dir: 'last', x: 0, y: -60 },
+        { label: 'close', dir: 'close', x: 85, y: 60}
     ];
 
     navDefs.forEach(function(def) {
