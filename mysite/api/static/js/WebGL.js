@@ -796,6 +796,20 @@ function drawMovableBox() {
     btnReload.userData.mat        = matR;
     boxGroup.add(btnReload);
     Buttons.push(btnReload);
+
+
+    var normalTexR  = makeButtonCanvas('close', false);
+    var pressedTexR = makeButtonCanvas('close', true);
+    var matR = new THREE.MeshBasicMaterial({ map: normalTexR });
+    var btnReload = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matR);
+    btnReload.position.set(-85, 60, -faceZ);
+    btnReload.rotation.y = Math.PI;
+    btnReload.userData.direction  = 'close';
+    btnReload.userData.normalTex  = normalTexR;
+    btnReload.userData.pressedTex = pressedTexR;
+    btnReload.userData.mat        = matR;
+    boxGroup.add(btnReload);
+    Buttons.push(btnReload);
 }
 
 var boxRaycaster = new THREE.Raycaster();   
@@ -870,6 +884,29 @@ function initBoxClicks() {
             if (dir === 'scroll') {
                 // flip back to front face
                 boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir ==='close'){
+
+                boxGroupTargetX    = isOut ?  0    : 0;
+                boxGroupTargetY    = isOut ?  610  : 610;
+                boxGroupTargetZ    = isOut ?  430  : 0;
+
+                camera.position.set(0, 500, 1500);
+                cameraControls.target.set(0, 43, -8);
+
+                // lock camera
+
+                cameraControls.enablePan = false;
+                cameraControls.enableRotate = true;
+                cameraControls.enableZoom = true;
+                cameraControls.maxPolarAngle = Math.PI / 2.3;
+                cameraControls.minPolarAngle = Math.PI / 4;
+                cameraControls.minAzimuthAngle = -0.2;
+                cameraControls.maxAzimuthAngle = 0.2;
+                cameraControls.minDistance = 500;
+                cameraControls.maxDistance = 2000;
+
             }
 
             if (dir === 'reload') {
