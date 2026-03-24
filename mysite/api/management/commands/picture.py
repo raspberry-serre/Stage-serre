@@ -11,12 +11,12 @@ save_folder = settings.MEDIA_ROOT / 'camera'
 ZOOM = 2.5
 
 NIGHT_START = 20
-NIGHT_END = 7
+NIGHT_END = 6
 
 
 def is_night():
     hour = datetime.now().hour
-    return hour < NIGHT_END or hour >= NIGHT_START
+    return hour < NIGHT_END or hour > NIGHT_START
 
 
 def capture_frame():
@@ -62,10 +62,17 @@ def cleanup_old_photos(max_count=800):
         photo.delete()
 
 
-def seconds_until_next_hour():
+def seconds_until_next_slot():
     now = datetime.now()
-    next_hour = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-    return (next_hour - now).total_seconds()
+    minute = now.minute
+
+    if minute < 30:
+        next_time = now.replace(minute=30, second=0, microsecond=0)
+    else:
+        next_time = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+
+    return (next_time - now).total_seconds()
+
 
 
 class Command(BaseCommand):
@@ -73,7 +80,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         while True:
-            wait_time = seconds_until_next_hour()
+            wait_time = seconds_until_next_slot()
+
             time.sleep(wait_time)
 
             if is_night():
