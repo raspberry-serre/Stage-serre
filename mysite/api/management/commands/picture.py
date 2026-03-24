@@ -44,7 +44,7 @@ def capture_frame():
     return True, frame
 
 
-def cleanup_old_photos(max_count=800):
+def cleanup_old_photos(max_count=500):
     total = Photo.objects.count()
     if total <= max_count:
         return
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                     django_file = File(f, name=f"{timestamp}.jpg")
                     Photo.objects.create(image=django_file)
 
-                cleanup_old_photos(max_count=800)
+                cleanup_old_photos(max_count=500)
 
             except:
                 pass
