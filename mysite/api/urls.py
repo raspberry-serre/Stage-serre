@@ -15,4 +15,6 @@ urlpatterns = [
     path('api/pompe/', views.pompe_cmd, name='pompe_cmd'),
     path('api/refill/', views.refill_cmd, name='refill_cmd'),
     path('api/eau/', views.eau_cmd, name='eau_cmd'),
+    path('api/photos/', views.photo_list),
+
 ]

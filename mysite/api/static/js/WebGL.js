@@ -1,6 +1,5 @@
 "use strict";
 import * as THREE from 'three';
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 var camera, renderer;
@@ -38,6 +37,26 @@ const tempPosition = new THREE.Vector3();
 
 var splashParticles = [];
 
+var boxGroup   = null;
+var tableGroup = null;
+var serreGroup = null;
+var Buttons = [];
+var boxGroupTargetZ = 0;
+var boxGroupTargetX = 0;
+var boxGroupTargetY = 610;
+var boxGroupTargetRotX = Math.PI/2;
+var boxGroupTargetRotY = 0;
+
+var screenTexture = null;
+var screenMaterial = null;
+
+var photoList = [];
+var photoIndex = 0;
+var screenTextureBack = null;
+var screenMaterialBack = null;
+
+
+
 function fillScene() {
     var light = new THREE.DirectionalLight(0xFFFFFF, 2);
     light.position.set(-1300, 700, 1240);
@@ -67,9 +86,32 @@ function fillScene() {
     drawWaterDrops();
     drawLCD();
     drawServo();
+    drawMovableBox();
+    drawLedLights();
+}
+
+function makeButtonCanvas(label, pressed) {
+    var c = document.createElement('canvas');
+    c.width = 128; c.height = 128;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = pressed ? '#3a5faa' : '#1a1a2e';
+    ctx.beginPath(); ctx.roundRect(4, 4, 120, 120, 16); ctx.fill();
+    ctx.strokeStyle = pressed ? '#ffffff' : '#7eb8ff';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(4, 4, 120, 120, 16); ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, 64, 68);
+    return new THREE.CanvasTexture(c);
 }
 
 function drawTable() {
+
+    tableGroup = new THREE.Group();
+    window.scene.add(tableGroup);
+
     var Textureloader = new THREE.TextureLoader();
     var TableTexture = Textureloader.load('/static/js/texture/bois.jpg');
     var material = new THREE.MeshPhongMaterial({ map: TableTexture });
@@ -77,14 +119,40 @@ function drawTable() {
     var table = new THREE.Mesh(new THREE.BoxGeometry(600, 30, 600), material);
     table.position.set(0, 205, 500);
     // table.receiveShadow = true; // shadow_code
-    window.scene.add(table);
+    tableGroup.add(table);
 
     var legPositions = [[-280,40,220],[280,40,220],[-280,40,780],[280,40,780]];
     legPositions.forEach(pos => {
         var leg = new THREE.Mesh(new THREE.BoxGeometry(40, 300, 40), material);
         leg.position.set(...pos);
         // leg.receiveShadow = true; // shadow_code
-        window.scene.add(leg);
+        tableGroup.add(leg);
+    });
+
+    var face   = 5;
+
+    var defs = [
+        { label: 'Photo', dir: 'Photo', x: 0, y: -60 }
+    ];
+
+    defs.forEach(function(def) {
+        var normalTex  = makeButtonCanvas(def.label, false);
+        var pressedTex = makeButtonCanvas(def.label, true);
+        var mat = new THREE.MeshBasicMaterial({ map: normalTex });
+
+        var btn = new THREE.Mesh(new THREE.BoxGeometry(100, 50, 2), mat);
+        btn.position.set(def.x, def.y, face);
+
+        btn.userData.direction  = def.dir;
+        btn.userData.normalTex  = normalTex;
+        btn.userData.pressedTex = pressedTex;
+        btn.userData.mat        = mat;
+
+        btn.position.set(200, 240, 450); 
+        btn.rotation.x = -Math.PI / 4;
+
+        tableGroup.add(btn);
+        Buttons.push(btn);
     });
 }
 
@@ -113,13 +181,16 @@ function drawfloor() {
 }
 
 function drawSerreFloor() {
+    serreGroup = new THREE.Group();
+    serreGroup.position.set(-50, 0, 0);
+    window.scene.add(serreGroup);
     var floor = new THREE.Mesh(
         new THREE.BoxGeometry(380, 10, 200),
         new THREE.MeshPhongMaterial({ color: 0xB68E65 })
     );
     floor.position.set(0, 222.5, 350);
     // floor.receiveShadow = true; // shadow_code
-    window.scene.add(floor);
+    serreGroup.add(floor);
 }
 
 function drawSerreWalls() {
@@ -136,14 +207,14 @@ function drawSerreWalls() {
     wallsPossitions.forEach(pos => {
         var walls = new THREE.Mesh(new THREE.BoxGeometry(380, 172, 10), material);
         walls.position.set(...pos);
-        window.scene.add(walls);
+        serreGroup.add(walls);
     });
 
     var sideWallsPositions = [[185, 313.5, 350], [-185, 313.5, 350]];
     sideWallsPositions.forEach(pos => {
         var sideWall = new THREE.Mesh(new THREE.BoxGeometry(10, 172, 200), material);
         sideWall.position.set(...pos);
-        window.scene.add(sideWall);
+        serreGroup.add(sideWall);
     });
 }
 
@@ -158,7 +229,7 @@ function drawPillars() {
     pillarPositions.forEach(pos => {
         var pillar = new THREE.Mesh(new THREE.BoxGeometry(10, 171, 10), material);
         pillar.position.set(...pos);
-        window.scene.add(pillar);
+        serreGroup.add(pillar);
     });
 }
 
@@ -185,9 +256,9 @@ function drawSupportToit() {
         geometry.setIndex(indices);
         geometry.computeVertexNormals();
 
-        var mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(...pos);
-        window.scene.add(mesh);
+        var supToit = new THREE.Mesh(geometry, material);
+        supToit.position.set(...pos);
+        serreGroup.add(supToit);
     });
 }
 
@@ -205,7 +276,7 @@ function drawToit() {
     var toit = new THREE.Mesh(geometry, material);
     toit.position.set(-99, 437, 350);
     toit.rotation.z = -(Math.PI / 2.6);
-    window.scene.add(toit);
+    serreGroup.add(toit);
 
     var geometry2 = new THREE.BoxGeometry(5, 210, 200);
     var toit2 = new THREE.Mesh(geometry2, material);
@@ -216,7 +287,7 @@ function drawToit() {
     toitMovible.rotation.z = Math.PI / 2.6;
     toitMovible.add(toit2);
 
-    window.scene.add(toitMovible);
+    serreGroup.add(toitMovible);
 }
 
 function drawLED() {
@@ -226,9 +297,10 @@ function drawLED() {
         var led = new THREE.Mesh(new THREE.BoxGeometry(2, 100, 15), material);
         led.position.set(...pos);
         led.rotation.z = -(Math.PI / 2.6);
-        window.scene.add(led);
+        serreGroup.add(led);
     });
 }
+
 function drawPot() {
     var Textureloader = new THREE.TextureLoader();
     var sideTexture = Textureloader.load('/static/js/texture/pot.jpg');
@@ -243,9 +315,8 @@ function drawPot() {
         [sideMaterial, topMaterial, bottomMaterial]
     );
     pot.position.set(potPosition.x, potPosition.y, potPosition.z);
-    window.scene.add(pot);
+    serreGroup.add(pot);
 
-  
     const outerRadius = 42;  
     const innerRadius = 38;  
     const height = 8;       
@@ -271,7 +342,7 @@ function drawPot() {
     // Pot height is 70, so top face is at potPosition.y + 35
     rim.position.set(potPosition.x, potPosition.y + 35, potPosition.z);
 
-    window.scene.add(rim);
+    serreGroup.add(rim);
 }
 
 function drawPlant() {
@@ -282,14 +353,14 @@ function drawPlant() {
     stem.position.set(potPosition.x, potPosition.y + 50, potPosition.z);
     // stem.castShadow = true; // shadow_code
     // stem.receiveShadow = true; // shadow_code
-    window.scene.add(stem);
+    serreGroup.add(stem);
 
     var material = new THREE.MeshPhongMaterial({ color: 0xFFFF00 });
     var flower = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), material);
     flower.position.set(potPosition.x, potPosition.y + 73.5, potPosition.z);
     // flower.castShadow = true; // shadow_code
     // flower.receiveShadow = true; // shadow_code
-    window.scene.add(flower);
+    serreGroup.add(flower);
 
     const petalShape = new THREE.Shape();
     petalShape.moveTo(0, 0);
@@ -302,22 +373,23 @@ function drawPlant() {
        side: THREE.DoubleSide,
     });
 
-const petalCount = 15;
-for (let i = 0; i < petalCount; i++) {
-    const angle = (i / petalCount) * Math.PI * 2;
+    const petalCount = 15;
+    for (let i = 0; i < petalCount; i++) {
+        const angle = (i / petalCount) * Math.PI * 2;
 
-    // Pivot sits at the center top of the stem
-    const pivot = new THREE.Object3D();
-    pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
-    pivot.rotation.y = angle; // ← handles radial direction
+        // Pivot sits at the center top of the stem
+        const pivot = new THREE.Object3D();
+        pivot.position.set(potPosition.x, potPosition.y + 75, potPosition.z);
+        pivot.rotation.y = angle; // ← handles radial direction
 
-    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
-    petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
-    petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
+        const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+        petal.position.set(0, -3.5, 0); // ← push petal outward from pivot
+        petal.rotation.x = -(Math.PI / 2 - 0.4); // ← tilt flat, slight upward cup
 
-    pivot.add(petal);
-    window.scene.add(pivot);
-}
+        pivot.add(petal);
+        serreGroup.add(pivot);
+    }
+
     var leafTexture = Textureloader.load('/static/js/texture/Leaves.jpg');
     var leafMaterial = new THREE.MeshPhongMaterial({ map: leafTexture, transparent: true });
     var bottomLeafsLocation = [
@@ -332,7 +404,7 @@ for (let i = 0; i < petalCount; i++) {
         leaf.position.set(pos.x, pos.y, pos.z);
         leaf.rotation.z = pos.rotationz;
         leaf.scale.set(500, 1, 1); 
-        window.scene.add(leaf);
+        serreGroup.add(leaf);
     });
 
     var topLeafsLocation = [
@@ -347,7 +419,7 @@ for (let i = 0; i < petalCount; i++) {
         leaf.position.set(pos.x, pos.y, pos.z);
         leaf.rotation.z = pos.rotationz;
         leaf.scale.set(500, 1, 1); 
-        window.scene.add(leaf);
+        serreGroup.add(leaf);
     });
 }
 
@@ -355,25 +427,25 @@ function drawPump() {
     var material = new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 100, specular: 0x888888     });
     var pumpBody = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 20, 32), material);
     pumpBody.position.set(55, 237, 420);
-    window.scene.add(pumpBody);
+    serreGroup.add(pumpBody);
 
     var pumpEntry = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
     pumpEntry.position.set(65, 242, 420);
     pumpEntry.rotation.z = Math.PI / 2; 
-    window.scene.add(pumpEntry);   
+    serreGroup.add(pumpEntry);   
     
     var pumpExit = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 10, 32), material);
     pumpExit.position.set(45, 232, 420);
     pumpExit.rotation.z = Math.PI / 2; 
-    window.scene.add(pumpExit);
+    serreGroup.add(pumpExit);
 
     var pumpLed = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), pumpLedMaterial);
     pumpLed.position.set(55, 245, 420);
-    window.scene.add(pumpLed);
+    serreGroup.add(pumpLed);
 
     var pumpLEDTop = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), pumpLedMaterial);
     pumpLEDTop.position.set(55, 250, 420);//y+5
-    window.scene.add(pumpLEDTop);
+    serreGroup.add(pumpLEDTop);
 
     //pump lock
     var Textureloader = new THREE.TextureLoader();
@@ -381,7 +453,7 @@ function drawPump() {
     lockMaterial = new THREE.MeshBasicMaterial({ map: lockTexture, transparent: true, opacity: 0 });
     var lock = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 0.1), lockMaterial);
     lock.position.set(50, 242, 437);
-    window.scene.add(lock);
+    serreGroup.add(lock);
 }
 
 function drawPipe() {
@@ -406,7 +478,7 @@ function drawPipe() {
     });
     var pipe = new THREE.Mesh(geometry, material);
     pipe.frustumCulled = false;  
-    window.scene.add(pipe);
+    serreGroup.add(pipe);
 
     var innerGeometry = new THREE.TubeGeometry(curve,20,1.5,8,false);
 
@@ -421,7 +493,7 @@ function drawPipe() {
 
     var innerPipe = new THREE.Mesh(innerGeometry, innerPipeMaterial);
     innerPipe.frustumCulled = false;  
-    window.scene.add(innerPipe);
+    serreGroup.add(innerPipe);
 
     var curve1 = new THREE.CatmullRomCurve3([
         new THREE.Vector3(60, 242, 420),
@@ -444,7 +516,7 @@ function drawPipe() {
     });
     var pipe1 = new THREE.Mesh(geometry1, material1);
     pipe1.frustumCulled = false; 
-    window.scene.add(pipe1);
+    serreGroup.add(pipe1);
 
     var innerGeometry1 = new THREE.TubeGeometry(curve1,50,1.5,8,false);
 
@@ -459,7 +531,7 @@ function drawPipe() {
 
     var innerPipe1 = new THREE.Mesh(innerGeometry1, innerPipeMaterial1);
     innerPipe1.frustumCulled = false;  
-    window.scene.add(innerPipe1);
+    serreGroup.add(innerPipe1);
 }
 
 function drawWaterTank() {
@@ -467,7 +539,7 @@ function drawWaterTank() {
     var tank = new THREE.Mesh(new THREE.BoxGeometry(40, 40, 40), material);
     tank.position.set(162, 240, 420);
     tank.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
-    window.scene.add(tank);
+    serreGroup.add(tank);
 
     var material = new THREE.MeshPhongMaterial({ 
         color: 0x0000FF, 
@@ -476,9 +548,9 @@ function drawWaterTank() {
         depthWrite: false 
     });
     waterMesh = new THREE.Mesh(new THREE.BoxGeometry(30, waterlevel, 32), material);
-    waterMesh.position.set(162, tankBottom + waterlevel+100 / 2, 420);
+    waterMesh.position.set(162, tankBottom + waterlevel / 2, 420);
     waterMesh.frustumCulled = false;  // ✅ prevents disappearing on camera rotate
-    window.scene.add(waterMesh);
+    serreGroup.add(waterMesh);
 }
 
 function drawWaterDrops() {
@@ -492,7 +564,7 @@ function drawWaterDrops() {
     });
 
     dropMesh = new THREE.InstancedMesh(geometry, material, DROP_COUNT);
-    window.scene.add(dropMesh);
+    serreGroup.add(dropMesh);
 
     for (let i = 0; i < DROP_COUNT; i++) {
 
@@ -561,15 +633,15 @@ function drawLCD(){
         new THREE.BoxGeometry(120, 20, 10),
         material
     );
-    lcdScreen.position.set(-80, 340, 455);
-    window.scene.add(lcdScreen); 
+    lcdScreen.position.set(-80, 360, 455);
+    serreGroup.add(lcdScreen); 
 
     var lcdBack = new THREE.Mesh(
         new THREE.BoxGeometry(135, 35, 5),
         new THREE.MeshPhongMaterial({ color: 0x006600 })
     );
-    lcdBack.position.set(-80, 340, 450);
-    window.scene.add(lcdBack);
+    lcdBack.position.set(-80, 360, 450);
+    serreGroup.add(lcdBack);
 
     window.setLCDText = function() {
         lcdCtx.fillStyle = '#006400';
@@ -590,12 +662,12 @@ function drawServo(){
     var servo = new THREE.Mesh(new THREE.BoxGeometry(20, 40, 20), new THREE.MeshPhongMaterial({ color: 0x333333 }));
     servo.position.set(70, 420, 450);
     servo.rotation.z = Math.PI/2.6;
-    window.scene.add(servo);
+    serreGroup.add(servo);
 
     var axe = new THREE.Mesh(new THREE.CylinderGeometry(2,2,15,24), new THREE.MeshPhongMaterial({color: 0x8E8E8E}));
     axe.position.set(80, 420, 435);
     axe.rotation.x = Math.PI/2;
-    window.scene.add(axe);
+    serreGroup.add(axe);
 
     var shape = new THREE.Shape();
 
@@ -616,8 +688,251 @@ function drawServo(){
     beltMesh = new THREE.Mesh(geometry, material);
     beltMesh.position.set(80, 420, 430);  // centré sur le grand cercle = position du servo
     beltMesh.rotation.z = -(Math.PI*1.3);
-    window.scene.add(beltMesh);    
+    serreGroup.add(beltMesh);    
 
+}
+
+function drawMovableBox() {
+    boxGroup = new THREE.Group();
+    boxGroup.position.set(0, 610, 0);
+    boxGroup.rotation.x = Math.PI/2;
+    window.scene.add(boxGroup);
+
+    var btnSize = 14;
+    var gap     = 170;
+    var faceZ   = 3.5;
+
+    // Main box
+    var box = new THREE.Mesh(
+        new THREE.BoxGeometry(200, 160, 5),
+        new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 80, specular: 0x553311 })
+    );
+    boxGroup.add(box);
+
+    screenTexture = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    screenMaterial = new THREE.MeshPhongMaterial({ map: screenTexture });
+    var frontScreen = new THREE.Mesh(
+        new THREE.BoxGeometry(150, 112.5, 1),
+        screenMaterial
+    );
+
+    frontScreen.position.set(0, 10, faceZ);
+    frontScreen.rotation.y = Math.PI;
+    boxGroup.add(frontScreen);
+    
+
+    // Front face: navigation buttons
+    var navDefs = [
+        { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
+        { label: '→', dir: 'right', x:  gap / 2, y: 0 },
+        { label: 'last', dir: 'last', x: 0, y: -60 },
+        { label: 'close', dir: 'close', x: 85, y: 60}
+    ];
+
+    navDefs.forEach(function(def) {
+        var normalTex  = makeButtonCanvas(def.label, false);
+        var pressedTex = makeButtonCanvas(def.label, true);
+        var mat = new THREE.MeshBasicMaterial({ map: normalTex });
+        var btn = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), mat);
+        btn.position.set(def.x, def.y, faceZ);
+        btn.userData.direction  = def.dir;
+        btn.userData.normalTex  = normalTex;
+        btn.userData.pressedTex = pressedTex;
+        btn.userData.mat        = mat;
+        boxGroup.add(btn);
+        Buttons.push(btn);
+    });
+
+
+    screenTextureBack = new THREE.TextureLoader().load('/media/camera/photo_latest.jpg');
+    screenMaterialBack = new THREE.MeshPhongMaterial({ map: screenTextureBack });
+    var screen = new THREE.Mesh(new THREE.BoxGeometry(150, 112.5, 1), screenMaterialBack);
+    screen.position.set(0, 10, -faceZ);
+    boxGroup.add(screen);
+
+    // ← auto reload every 10 minutes
+    function scheduleHourlyReload() {
+        var msUntilNext = 10 * 60 * 1000 + 1000;  // 10 minutes and 1 second in milliseconds
+        setTimeout(function() {
+            var old = screenTexture;
+            new THREE.TextureLoader().load(
+                '/media/camera/photo_latest.jpg?t=' + Date.now(),
+                function(newTexture) {
+                    screenMaterial.map = newTexture;
+                    screenMaterial.needsUpdate = true;
+                    old.dispose();
+                    screenTexture = newTexture;
+                }
+            );
+            scheduleHourlyReload();
+        }, msUntilNext);
+    }
+    scheduleHourlyReload();
+
+    // Back face: scroll button (flips back to front)
+    var normalTexB  = makeButtonCanvas('scroll', false);
+    var pressedTexB = makeButtonCanvas('scroll', true);
+    var matB = new THREE.MeshBasicMaterial({ map: normalTexB });
+    var btnBack = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matB);
+    btnBack.position.set(40, -60, -faceZ);
+    btnBack.rotation.y = Math.PI;
+    btnBack.userData.direction  = 'scroll';
+    btnBack.userData.normalTex  = normalTexB;
+    btnBack.userData.pressedTex = pressedTexB;
+    btnBack.userData.mat        = matB;
+    boxGroup.add(btnBack);
+    Buttons.push(btnBack);
+
+    // Back face: reload button
+    var normalTexR  = makeButtonCanvas('reload', false);
+    var pressedTexR = makeButtonCanvas('reload', true);
+    var matR = new THREE.MeshBasicMaterial({ map: normalTexR });
+    var btnReload = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matR);
+    btnReload.position.set(-40, -60, -faceZ);
+    btnReload.rotation.y = Math.PI;
+    btnReload.userData.direction  = 'reload';
+    btnReload.userData.normalTex  = normalTexR;
+    btnReload.userData.pressedTex = pressedTexR;
+    btnReload.userData.mat        = matR;
+    boxGroup.add(btnReload);
+    Buttons.push(btnReload);
+
+
+    var normalTexR  = makeButtonCanvas('close', false);
+    var pressedTexR = makeButtonCanvas('close', true);
+    var matR = new THREE.MeshBasicMaterial({ map: normalTexR });
+    var btnReload = new THREE.Mesh(new THREE.BoxGeometry(btnSize, btnSize, 2), matR);
+    btnReload.position.set(-85, 60, -faceZ);
+    btnReload.rotation.y = Math.PI;
+    btnReload.userData.direction  = 'close';
+    btnReload.userData.normalTex  = normalTexR;
+    btnReload.userData.pressedTex = pressedTexR;
+    btnReload.userData.mat        = matR;
+    boxGroup.add(btnReload);
+    Buttons.push(btnReload);
+}
+
+var boxRaycaster = new THREE.Raycaster();   
+var boxMouse     = new THREE.Vector2();
+
+function loadPhotoAtIndex(i) {
+    if (!photoList || photoList.length === 0) return;
+
+    photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
+
+    var url = photoList[photoIndex] + '?t=' + Date.now();
+
+    var old = screenTexture;
+    new THREE.TextureLoader().load(url, function(newTexture) {
+        screenMaterial.map = newTexture;
+        screenMaterial.needsUpdate = true;
+        if (old) old.dispose();
+        screenTexture = newTexture;
+    });
+}
+
+
+function initBoxClicks() {
+    renderer.domElement.addEventListener('pointerdown', function(e) {
+        var rect    = renderer.domElement.getBoundingClientRect();
+        boxMouse.x  = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+        boxMouse.y  = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+
+        boxRaycaster.setFromCamera(boxMouse, camera);
+        var hits = boxRaycaster.intersectObjects(Buttons);
+
+        if (hits.length > 0) {
+            var btn = hits[0].object;
+            var dir = btn.userData.direction;
+
+            // Visual press feedback
+            btn.userData.mat.map = btn.userData.pressedTex;
+            btn.userData.mat.needsUpdate = true;
+            btn.scale.setScalar(0.88);
+
+            setTimeout(function() {
+                btn.userData.mat.map = btn.userData.normalTex;
+                btn.userData.mat.needsUpdate = true;
+                btn.scale.setScalar(1.0);
+            }, 180);
+
+            if (dir === 'Photo') {
+                var isOut = boxGroupTargetZ === 0;  // true = currently hidden, moving to visible
+                boxGroupTargetX    = isOut ?  0    : 0;
+                boxGroupTargetY    = isOut ?  610  : 610;
+                boxGroupTargetZ    = isOut ?  430  : 0;
+                camera.position.x = 0;
+                camera.position.y = 0;
+                camera.position.z = 600;
+                cameraControls.target.set(0, 510, 0);
+                cameraControls.enablePan = false;
+                cameraControls.enableRotate = false;
+                cameraControls.enableZoom = false;
+                if (isOut) {
+                    boxGroupTargetRotX = 0;
+                } else {
+                    boxGroupTargetRotX = Math.PI / 2;
+                }
+            }
+
+            if (dir === 'last') {
+                // flip to back face
+                boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir === 'scroll') {
+                // flip back to front face
+                boxGroupTargetRotY += Math.PI;
+            }
+
+            if (dir ==='close'){
+
+                boxGroupTargetX    = isOut ?  0    : 0;
+                boxGroupTargetY    = isOut ?  610  : 610;
+                boxGroupTargetZ    = isOut ?  430  : 0;
+
+                camera.position.set(0, 500, 1500);
+                cameraControls.target.set(0, 43, -8);
+
+                // lock camera
+
+                cameraControls.enablePan = false;
+                cameraControls.enableRotate = true;
+                cameraControls.enableZoom = true;
+                cameraControls.maxPolarAngle = Math.PI / 2.3;
+                cameraControls.minPolarAngle = Math.PI / 4;
+                cameraControls.minAzimuthAngle = -0.2;
+                cameraControls.maxAzimuthAngle = 0.2;
+                cameraControls.minDistance = 500;
+                cameraControls.maxDistance = 2000;
+
+            }
+
+            if (dir === 'reload') {
+                // reload the latest photo texture
+                var old = screenTexture;
+                new THREE.TextureLoader().load(
+                    '/media/camera/photo_latest.jpg?t=' + Date.now(),
+                    function(newTexture) {
+                        screenMaterial.map = newTexture;
+                        screenMaterial.needsUpdate = true;
+                        old.dispose();
+                        screenTexture = newTexture;
+                    }
+                );
+            }
+
+            if (dir === 'left') {
+                // handle left navigation
+                loadPhotoAtIndex(photoIndex - 1);
+            }   
+
+            if (dir === 'right') {
+                // handle right navigation
+                loadPhotoAtIndex(photoIndex + 1);
+            }
+        }
+    });
 }
 
 function init() {
@@ -674,22 +989,30 @@ var ledLightPosition = [
     { x: -100, y: 430, z: 390 }
 ];
 
-ledLightPosition.forEach(pos => {
-    var light = new THREE.SpotLight(0xFF0000, 0);
-    light.position.set(pos.x, pos.y, pos.z);
-    light.distance = 400;
-    light.angle = Math.PI / 15;
-    light.penumbra = 0.2;
-    // light.castShadow = true; // shadow_code
+function drawLedLights() {
+    ledLightPosition.forEach(pos => {
+        var light = new THREE.SpotLight(0xFF0000, 0);
+        light.position.set(pos.x, pos.y, pos.z);
+        light.distance = 400;
+        light.angle = Math.PI / 15;
+        light.penumbra = 0.2;
+        // light.castShadow = true; // shadow_code
 
-    var ledTarget = new THREE.Object3D();
-    ledTarget.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
-    window.scene.add(ledTarget);
-    light.target = ledTarget;
+        var ledTarget = new THREE.Object3D();
+        ledTarget.position.set(potPosition.x, potPosition.y + 70, potPosition.z);
+        serreGroup.add(ledTarget);
+        light.target = ledTarget;
 
-    window.scene.add(light);
-    ledLights.push(light);
-});
+        serreGroup.add(light);
+        ledLights.push(light);
+
+        /*
+        var helper = new THREE.SpotLightHelper(light);
+        serreGroup.add(helper); 
+        */      
+    });
+
+}
 
 window.setLedIntensity = function(ledState) {
     var intensity = (ledState === 'ON') ? 250000 : 0;
@@ -751,9 +1074,18 @@ function render() {
         }
     }
 
+    if (boxGroup) {
+        var speed = 0.02;
+        boxGroup.position.x   += (boxGroupTargetX    - boxGroup.position.x)   * speed;
+        boxGroup.position.y   += (boxGroupTargetY    - boxGroup.position.y)   * speed;
+        boxGroup.position.z   += (boxGroupTargetZ    - boxGroup.position.z)   * speed;
+        boxGroup.rotation.x   += (boxGroupTargetRotX - boxGroup.rotation.x)   * speed;
+        boxGroup.rotation.y   += (boxGroupTargetRotY - boxGroup.rotation.y)   * (speed*10);
+    }
+
     if (waterMesh) {
         waterMesh.scale.y = waterlevel / 20;
-        waterMesh.position.y = tankBottom + (waterlevel / 2) * (waterlevel / 20)+7;
+        waterMesh.position.y = tankBottom + waterlevel / 2;
     }
 
     if (innerPipeMaterial) {
@@ -839,8 +1171,15 @@ function render() {
 try {
     init();
     fillScene();
+    fetch('/api/photos/')
+    .then(r => r.json())
+    .then(data => {
+        photoList = data.photos;
+        photoIndex = 0;
+    });
     addToDOM();
     animate();
+    initBoxClicks();
 } catch(e) {
     console.error("WebGL error:", e);
 }

@@ -34,3 +34,10 @@ class Logs(models.Model):
 
     def __str__(self):
         return f"Log {self.username}: {self.id}: {self.action}"
+
+class Photo(models.Model):
+    image = models.ImageField(upload_to='camera/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo {self.id}"

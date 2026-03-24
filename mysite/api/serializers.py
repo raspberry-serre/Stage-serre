@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Logs, Serre, Usr
+from .models import Logs, Serre, Usr, Photo
 
 class SerreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,4 +14,9 @@ class UsrSerializer(serializers.ModelSerializer):
 class LogsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logs
+        fields = '__all__'
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Photo
         fields = '__all__'

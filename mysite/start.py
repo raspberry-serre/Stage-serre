@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
 subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 migrations = subprocess.Popen([sys.executable, "manage.py", "makemigrations"])
 migrations.wait()

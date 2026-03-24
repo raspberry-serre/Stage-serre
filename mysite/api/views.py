@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import render, redirect
-from .models import Serre, Usr, Logs
+from .models import Serre, Usr, Logs, Photo
 from .serializers import SerreSerializer
 from datetime import datetime
 from django.contrib.auth.hashers import check_password, make_password
@@ -326,3 +326,10 @@ def new_account(request):
         return redirect('login')
 
     return render(request, "new_account.html")
+
+@api_view(['GET'])
+def photo_list(request):
+    photos = Photo.objects.order_by('-created_at')
+    return Response({
+        "photos": [p.image.url for p in photos]
+    })

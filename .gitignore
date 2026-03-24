@@ -2,5 +2,5 @@
 __pycache__/
 *.pyc
 db.sqlite3
-pictures/
-!pictures/.gitkeep
+mysite/media/camera/
+!mysite/media/camera/.gitkeep
