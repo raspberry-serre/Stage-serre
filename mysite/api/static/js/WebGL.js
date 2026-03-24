@@ -869,7 +869,6 @@ function initBoxClicks() {
                 cameraControls.enableRotate = false;
                 cameraControls.enableZoom = false;
                 if (isOut) {
-                    boxGroup.rotation.x = 20;
                     boxGroupTargetRotX = 0;
                 } else {
                     boxGroupTargetRotX = Math.PI / 2;
