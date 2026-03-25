@@ -171,11 +171,8 @@ def eau_cmd(request):
 def last_serre(request):
     if not check_session(request):
         return Response({'error': 'not authenticated'}, status=401)
-    lastserre = Serre.objects.order_by('-created_at').first()
-
-    if not lastserre:
-        return Response({"error": "No data"}, status=404)
-        serializer = SerreSerializer(lastserre)
+    lastserre = Serre.objects.latest('created_at')
+    serializer = SerreSerializer(lastserre)
 
     recent_logs = Logs.objects.order_by('-created_at')[:10]
     log_lines = [

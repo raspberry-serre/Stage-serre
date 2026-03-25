@@ -17,15 +17,6 @@ class LogsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PhotoSerializer(serializers.ModelSerializer):
-    path = serializers.SerializerMethodField()
-
     class Meta:
         model = Photo
-        fields = ['id', 'path', 'created_at']
-
-    def get_path(self, obj):
-        request = self.context.get('request')
-        if obj.image:
-            url = obj.image.url
-            return request.build_absolute_uri(url) if request else url
-        return None
+        fields = '__all__'
