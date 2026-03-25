@@ -719,6 +719,33 @@ function drawMovableBox() {
     frontScreen.position.set(0, 10, faceZ);
     frontScreen.rotation.y = Math.PI;
     boxGroup.add(frontScreen);
+
+    // Front face: photo name label (same pattern as LCD)
+    var photoLabelCanvas = document.createElement('canvas');
+    photoLabelCanvas.width = 512;
+    photoLabelCanvas.height = 32;
+    var photoLabelCtx = photoLabelCanvas.getContext('2d');
+    photoLabelCtx.fillStyle = '#000000';
+    photoLabelCtx.fillRect(0, 0, 512, 32);
+    photoLabelCtx.fillStyle = '#00ff00';
+    photoLabelCtx.font = 'bold 20px monospace';
+    photoLabelCtx.fillText('---', 10, 22);
+    var photoLabelTexture = new THREE.CanvasTexture(photoLabelCanvas);
+    var textBox = new THREE.Mesh(
+        new THREE.BoxGeometry(100, 10, 5),
+        new THREE.MeshPhongMaterial({ map: photoLabelTexture, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+    );
+    textBox.position.set(0, 71, faceZ);
+    boxGroup.add(textBox);
+
+    window.setPhotoLabel = function(path) {
+        photoLabelCtx.fillStyle = '#000000';
+        photoLabelCtx.fillRect(0, 0, 512, 32);
+        photoLabelCtx.fillStyle = '#00ff00';
+        photoLabelCtx.font = 'bold 20px monospace';
+        photoLabelCtx.fillText(path.split('/').pop(), 10, 22);
+        photoLabelTexture.needsUpdate = true;
+    };
     
 
     // Front face: navigation buttons
@@ -815,20 +842,32 @@ function drawMovableBox() {
 var boxRaycaster = new THREE.Raycaster();   
 var boxMouse     = new THREE.Vector2();
 
-function loadPhotoAtIndex(i) {
+function loadPhotoAtIndex(i = 0) {
     if (!photoList || photoList.length === 0) return;
 
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var url = photoList[photoIndex] + '?t=' + Date.now();
+    const photo = photoList[photoIndex];
+
+    if (!photo || !photo.path) {
+        console.error("Invalid photo at index:", photoIndex, photo);
+        return;
+    }
+
+    var url = photo.path + '?t=' + Date.now();
 
     var old = screenTexture;
+
     new THREE.TextureLoader().load(url, function(newTexture) {
         screenMaterial.map = newTexture;
         screenMaterial.needsUpdate = true;
         if (old) old.dispose();
         screenTexture = newTexture;
     });
+
+    if (window.setPhotoLabel) {
+        window.setPhotoLabel(photo.path);
+    }
 }
 
 
@@ -924,11 +963,13 @@ function initBoxClicks() {
 
             if (dir === 'left') {
                 // handle left navigation
+                console.log("FINAL photoList:", photoList);
                 loadPhotoAtIndex(photoIndex - 1);
             }   
 
             if (dir === 'right') {
                 // handle right navigation
+                console.log("FINAL photoList:", photoList);
                 loadPhotoAtIndex(photoIndex + 1);
             }
         }
@@ -1174,8 +1215,15 @@ try {
     fetch('/api/photos/')
     .then(r => r.json())
     .then(data => {
-        photoList = data.photos;
+        console.log("API DATA:", data);
+
+        photoList = data.photos; // ✅ extract array
+
         photoIndex = 0;
+
+        if (photoList && photoList.length > 0) {
+            loadPhotoAtIndex(0);
+        }
     });
     addToDOM();
     animate();
