@@ -1,6 +1,9 @@
 "use strict";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FontLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "https://unpkg.com/three@0.160.0/examples/jsm/geometries/TextGeometry.js";
+
 
 var camera, renderer;
 var ground = true;
@@ -54,6 +57,8 @@ var photoList = [];
 var photoIndex = 0;
 var screenTextureBack = null;
 var screenMaterialBack = null;
+var photoLabelMesh = null;
+
 
 
 
@@ -720,6 +725,43 @@ function drawMovableBox() {
     frontScreen.rotation.y = Math.PI;
     boxGroup.add(frontScreen);
     
+    // Front face: photo name label using TextGeometry
+    var fontLoader = new FontLoader();
+// ✅ URL goes in fontLoader.load(), makeLabel has actual content
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+    function makeLabel(text) {
+        const geo = new TextGeometry(text, {
+	    font: font,
+	    size: 4,
+	    curveSegments: 120,
+        height:1,
+
+        });
+        geo.center();
+        const mat = new THREE.MeshBasicMaterial({ color: 0x000000});
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(0, 72, faceZ);
+        return mesh;
+    }
+
+    if (photoLabelMesh) {
+        boxGroup.remove(photoLabelMesh);
+        photoLabelMesh.geometry.dispose();
+    }
+    photoLabelMesh = makeLabel('sdd');
+    boxGroup.add(photoLabelMesh);
+
+    window.setPhotoLabel = function(path) {
+        const filename = path.split('/').pop() || 'NO NAME';
+        if (photoLabelMesh) {
+            boxGroup.remove(photoLabelMesh);
+            photoLabelMesh.geometry.dispose();
+        }
+        photoLabelMesh = makeLabel(filename);
+        boxGroup.add(photoLabelMesh);
+    };
+});
+
 
     // Front face: navigation buttons
     var navDefs = [
@@ -820,7 +862,7 @@ function loadPhotoAtIndex(i) {
 
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var url = photoList[photoIndex] + '?t=' + Date.now();
+    var url = photoList[photoIndex].path + '?t=' + Date.now();
 
     var old = screenTexture;
     new THREE.TextureLoader().load(url, function(newTexture) {
@@ -829,6 +871,8 @@ function loadPhotoAtIndex(i) {
         if (old) old.dispose();
         screenTexture = newTexture;
     });
+
+    if (window.setPhotoLabel) window.setPhotoLabel(photoList[photoIndex].path);
 }
 
 
