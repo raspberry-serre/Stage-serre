@@ -859,11 +859,12 @@ var boxMouse     = new THREE.Vector2();
 
 function loadPhotoAtIndex(i) {
     if (!photoList || photoList.length === 0) return;
-
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var url = photoList[photoIndex].path + '?t=' + Date.now();
+    var path = photoList[photoIndex];  // ← it's already a string, not an object
+    if (!path) return;
 
+    var url = path + '?t=' + Date.now();
     var old = screenTexture;
     new THREE.TextureLoader().load(url, function(newTexture) {
         screenMaterial.map = newTexture;
@@ -872,7 +873,7 @@ function loadPhotoAtIndex(i) {
         screenTexture = newTexture;
     });
 
-    if (window.setPhotoLabel) window.setPhotoLabel(photoList[photoIndex].path);
+    if (window.setPhotoLabel) window.setPhotoLabel(path);
 }
 
 
@@ -1218,6 +1219,8 @@ try {
     fetch('/api/photos/')
     .then(r => r.json())
     .then(data => {
+        console.log("API DATA:", data);           // ← check full structure
+        console.log("First photo:", data.photos[0]); // ← check what fields exist
         photoList = data.photos;
         photoIndex = 0;
     });
