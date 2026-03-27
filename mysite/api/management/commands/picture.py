@@ -71,7 +71,7 @@ def seconds_until_next_slot():
     else:
         next_time = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
-    return (next_time - now).total_seconds()
+    return ((next_time - now).total_seconds())-1
 
 
 
