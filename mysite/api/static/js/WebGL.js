@@ -748,7 +748,7 @@ fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.
         boxGroup.remove(photoLabelMesh);
         photoLabelMesh.geometry.dispose();
     }
-    photoLabelMesh = makeLabel('sdd');
+    photoLabelMesh = makeLabel('');
     boxGroup.add(photoLabelMesh);
 
     window.setPhotoLabel = function(path) {
