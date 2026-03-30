@@ -816,10 +816,10 @@ function drawMovableBox() {
                     screenTexture = newTexture;
                 }
             );
-            scheduleHourlyReload();
+            //scheduleHourlyReload();
         }, msUntilNext);
     }
-    scheduleHourlyReload();
+    //scheduleHourlyReload();
 
     // Back face: scroll button (flips back to front)
     var normalTexB  = makeButtonCanvas('scroll', false);
@@ -868,23 +868,59 @@ var boxRaycaster = new THREE.Raycaster();
 var boxMouse     = new THREE.Vector2();
 
 function loadPhotoAtIndex(i) {
+    console.log("🔥 FUNCTION CALLED 🔥");
     if (!photoList || photoList.length === 0) return;
+
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
     var photo = photoList[photoIndex];
-    if (!photo) return;
 
-    var url = photo.path + '?t=' + Date.now();
+    console.log("INDEX:", photoIndex);
+    console.log("PHOTO:", photo);
+
+    let path = null;
+
+    if (typeof photo === "string") path = photo;
+    else if (photo.image) path = photo.image;
+    else if (photo.path) path = photo.path;
+
+    console.log("PATH:", path);
+
+    // ✅ UPDATE LABELS HERE
+    if (window.setPhotoLabel) {
+        window.setPhotoLabel(path);
+    }
+
+    if (window.setSerreLabel && photo.serre) {
+        window.setSerreLabel(photo.serre);
+    }
+
+    if (!path) {
+        console.error("Invalid photo object:", photo);
+        return;
+    }
+
+    var url = "http://127.0.0.1:8000" + path + '?t=' + Date.now();
+
+    console.log("URL:", url);
+
     var old = screenTexture;
-    new THREE.TextureLoader().load(url, function(newTexture) {
-        screenMaterial.map = newTexture;
-        screenMaterial.needsUpdate = true;
-        if (old) old.dispose();
-        screenTexture = newTexture;
-    });
 
-    if (window.setPhotoLabel) window.setPhotoLabel(photo.path);
-    //if (window.setSerreLabel) window.setSerreLabel(photo.serre);
+    new THREE.TextureLoader().load(
+        url,
+        function(newTexture) {
+            console.log("TEXTURE LOADED ✅");
+
+            screenMaterial.map = newTexture;
+            screenMaterial.needsUpdate = true;
+
+            screenTexture = newTexture;
+        },
+        undefined,
+        function(err) {
+            console.error("TEXTURE FAILED ❌", url, err);
+        }
+    );
 }
 
 
@@ -978,15 +1014,15 @@ function initBoxClicks() {
                 );
             }
 
-            if (dir === 'left') {
-                // handle left navigation
-                loadPhotoAtIndex(photoIndex + 1);
-            }   
+if (dir === 'left') {
+    console.log("LEFT CLICK");
+    loadPhotoAtIndex(photoIndex + 1);
+}
 
-            if (dir === 'right') {
-                // handle right navigation
-                loadPhotoAtIndex(photoIndex - 1);
-            }
+if (dir === 'right') {
+    console.log("RIGHT CLICK");
+    loadPhotoAtIndex(photoIndex - 1);
+}
         }
     });
 }

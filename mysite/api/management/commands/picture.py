@@ -104,5 +104,5 @@ class Command(BaseCommand):
 
                 cleanup_old_photos(max_count=500)
 
-            except:
-                pass
+            except Exception as e:
+                print("❌ ERROR SAVING PHOTO:", e)
