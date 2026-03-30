@@ -900,7 +900,7 @@ function loadPhotoAtIndex(i) {
         return;
     }
 
-    var url = "http://127.0.0.1:8000" + path + '?t=' + Date.now();
+    var url = window.location.origin + path + '?t=' + Date.now();
 
     console.log("URL:", url);
 
