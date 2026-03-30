@@ -60,8 +60,10 @@ class Command(BaseCommand):
                             # ---------------- CLEANUP OLD RECORDS ----------------
                             total = Serre.objects.count()
                             if total > MAX_RECORDS:
-                                oldest = Serre.objects.order_by('created_at')[:total - MAX_RECORDS]
-                                Serre.objects.filter(id__in=oldest.values_list('id', flat=True)).delete()
+                                # FAST DELETE: remove all rows with id <= cutoff
+                                max_id = Serre.objects.order_by('-id').first().id
+                                cutoff = max_id - MAX_RECORDS
+                                Serre.objects.filter(id__lte=cutoff).delete()
                     except json.JSONDecodeError:
                         pass  # silently ignore bad JSON
             except serial.SerialException:
