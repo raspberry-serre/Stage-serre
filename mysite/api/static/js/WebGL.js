@@ -58,6 +58,7 @@ var photoIndex = 0;
 var screenTextureBack = null;
 var screenMaterialBack = null;
 var photoLabelMesh = null;
+var photoSerreMesh = null;
 
 
 
@@ -725,42 +726,50 @@ function drawMovableBox() {
     frontScreen.rotation.y = Math.PI;
     boxGroup.add(frontScreen);
     
-    // Front face: photo name label using TextGeometry
+// Front face: photo name label using TextGeometry
     var fontLoader = new FontLoader();
-// ✅ URL goes in fontLoader.load(), makeLabel has actual content
-fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-    function makeLabel(text) {
-        const geo = new TextGeometry(text, {
-	    font: font,
-	    size: 4,
-	    curveSegments: 120,
-        height:1,
-
-        });
-        geo.center();
-        const mat = new THREE.MeshBasicMaterial({ color: 0x000000});
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(0, 72, faceZ);
-        return mesh;
-    }
-
-    if (photoLabelMesh) {
-        boxGroup.remove(photoLabelMesh);
-        photoLabelMesh.geometry.dispose();
-    }
-    photoLabelMesh = makeLabel('');
-    boxGroup.add(photoLabelMesh);
-
-    window.setPhotoLabel = function(path) {
-        const filename = path.split('/').pop() || 'NO NAME';
-        if (photoLabelMesh) {
-            boxGroup.remove(photoLabelMesh);
-            photoLabelMesh.geometry.dispose();
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+        function makeLabel(text, size, color, yPos) {
+            const geo = new TextGeometry(text, {
+                font: font,
+                size: size,
+                curveSegments: 12,
+                height: 1,
+            });
+            geo.center();
+            const mat = new THREE.MeshBasicMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(0, yPos, faceZ+5);
+            return mesh;
         }
-        photoLabelMesh = makeLabel(filename);
+
+        // initial empty labels
+        photoLabelMesh = makeLabel('', 4, 0x000000, 72);
         boxGroup.add(photoLabelMesh);
-    };
-});
+
+        photoSerreMesh = makeLabel('', 3, 0xff6600, 63);
+        boxGroup.add(photoSerreMesh);
+
+        window.setPhotoLabel = function(path) {
+            const filename = path.split('/').pop() || 'NO NAME';
+            if (photoLabelMesh) {
+                boxGroup.remove(photoLabelMesh);
+                photoLabelMesh.geometry.dispose();
+            }
+            photoLabelMesh = makeLabel(filename, 4, 0x000000, 72);
+            boxGroup.add(photoLabelMesh);
+        };
+
+        window.setSerreLabel = function(serre) {
+            var text = serre ? serre.created_at + '  ' + serre.temp + 'C' : '';
+            if (photoSerreMesh) {
+                boxGroup.remove(photoSerreMesh);
+                photoSerreMesh.geometry.dispose();
+            }
+            photoSerreMesh = makeLabel(text, 3, 0xff6600, 63);
+            boxGroup.add(photoSerreMesh);
+        };
+    });
 
 
     // Front face: navigation buttons
@@ -861,10 +870,10 @@ function loadPhotoAtIndex(i) {
     if (!photoList || photoList.length === 0) return;
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var path = photoList[photoIndex];  // ← it's already a string, not an object
-    if (!path) return;
+    var photo = photoList[photoIndex];  // ← now an object with path, created_at, serre
+    if (!photo) return;
 
-    var url = path + '?t=' + Date.now();
+    var url = photo.path + '?t=' + Date.now();
     var old = screenTexture;
     new THREE.TextureLoader().load(url, function(newTexture) {
         screenMaterial.map = newTexture;
@@ -873,7 +882,8 @@ function loadPhotoAtIndex(i) {
         screenTexture = newTexture;
     });
 
-    if (window.setPhotoLabel) window.setPhotoLabel(path);
+    if (window.setPhotoLabel) window.setPhotoLabel(photo.path);
+    if (window.setSerreLabel) window.setSerreLabel(photo.serre);
 }
 
 
@@ -969,12 +979,12 @@ function initBoxClicks() {
 
             if (dir === 'left') {
                 // handle left navigation
-                loadPhotoAtIndex(photoIndex + 1);
+                loadPhotoAtIndex(photoIndex - 1);
             }   
 
             if (dir === 'right') {
                 // handle right navigation
-                loadPhotoAtIndex(photoIndex - 1);
+                loadPhotoAtIndex(photoIndex + 1);
             }
         }
     });
