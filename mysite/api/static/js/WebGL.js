@@ -871,7 +871,7 @@ function loadPhotoAtIndex(i) {
     if (!photoList || photoList.length === 0) return;
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var photo = photoList[photoIndex];  // ← now an object with path, created_at, serre
+    var photo = photoList[photoIndex];
     if (!photo) return;
 
     var url = photo.path + '?t=' + Date.now();
@@ -884,7 +884,7 @@ function loadPhotoAtIndex(i) {
     });
 
     if (window.setPhotoLabel) window.setPhotoLabel(photo.path);
-    if (window.setSerreLabel) window.setSerreLabel(photo.serre);
+    //if (window.setSerreLabel) window.setSerreLabel(photo.serre);
 }
 
 
