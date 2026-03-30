@@ -969,12 +969,12 @@ function initBoxClicks() {
 
             if (dir === 'left') {
                 // handle left navigation
-                loadPhotoAtIndex(photoIndex - 1);
+                loadPhotoAtIndex(photoIndex + 1);
             }   
 
             if (dir === 'right') {
                 // handle right navigation
-                loadPhotoAtIndex(photoIndex + 1);
+                loadPhotoAtIndex(photoIndex - 1);
             }
         }
     });
