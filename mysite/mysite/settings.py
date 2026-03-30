@@ -118,5 +118,6 @@ USE_TZ = True
 
 # Use an absolute static URL so generated paths start with `/static/`
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [ BASE_DIR / "static" ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

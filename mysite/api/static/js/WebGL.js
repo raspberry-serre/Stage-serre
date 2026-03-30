@@ -1,8 +1,9 @@
 "use strict";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { FontLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "https://unpkg.com/three@0.160.0/examples/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "/static/js/three/FontLoader.js";
+import { TextGeometry } from "/static/js/three/TextGeometry.js";
+
 
 
 var camera, renderer;
@@ -728,7 +729,7 @@ function drawMovableBox() {
     
 // Front face: photo name label using TextGeometry
     var fontLoader = new FontLoader();
-    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+    fontLoader.load('/static/fonts/helvetiker_regular.typeface.json', function(font) {
         function makeLabel(text, size, color, yPos) {
             const geo = new TextGeometry(text, {
                 font: font,
