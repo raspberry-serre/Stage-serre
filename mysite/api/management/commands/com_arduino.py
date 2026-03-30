@@ -59,11 +59,15 @@ class Command(BaseCommand):
                             )
                             # ---------------- CLEANUP OLD RECORDS ----------------
                             total = Serre.objects.count()
+                            total = Serre.objects.count()
                             if total > MAX_RECORDS:
-                                # FAST DELETE: remove all rows with id <= cutoff
-                                max_id = Serre.objects.order_by('-id').first().id
-                                cutoff = max_id - MAX_RECORDS
-                                Serre.objects.filter(id__lte=cutoff).delete()
+                                # Delete exactly the 3600 oldest rows
+                                old_ids = (
+                                    Serre.objects.order_by('id')
+                                    .values_list('id', flat=True)[:3600]
+                                )
+                                Serre.objects.filter(id__in=list(old_ids)).delete()
+
                     except json.JSONDecodeError:
                         pass  # silently ignore bad JSON
             except serial.SerialException:
