@@ -739,7 +739,7 @@ function drawMovableBox() {
             geo.center();
             const mat = new THREE.MeshBasicMaterial({ color: color });
             const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(0, yPos, faceZ+5);
+            mesh.position.set(0, yPos, faceZ);
             return mesh;
         }
 
@@ -979,12 +979,12 @@ function initBoxClicks() {
 
             if (dir === 'left') {
                 // handle left navigation
-                loadPhotoAtIndex(photoIndex - 1);
+                loadPhotoAtIndex(photoIndex + 1);
             }   
 
             if (dir === 'right') {
                 // handle right navigation
-                loadPhotoAtIndex(photoIndex + 1);
+                loadPhotoAtIndex(photoIndex - 1);
             }
         }
     });
