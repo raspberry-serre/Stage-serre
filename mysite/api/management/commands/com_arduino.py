@@ -10,7 +10,7 @@ from api.models import Serre  # Adjust if your app name is different
 CMD_FILE = "/tmp/serre_cmds.txt"
 SERIAL_PORTS = ["/dev/ttyACM0", "/dev/ttyACM1"]
 BAUDRATE = 9600
-MAX_RECORDS = 2500000
+MAX_RECORDS = 2500000 #need fix
 SERIAL_INTERVAL = 0.1  # loop sleep time
 
 # ---------------- COMMAND ----------------
