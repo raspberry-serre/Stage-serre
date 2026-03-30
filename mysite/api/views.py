@@ -329,7 +329,7 @@ def new_account(request):
 
 @api_view(['GET'])
 def photo_list(request):
-    photos = Photo.objects.order_by('created_at')
+    photos = Photo.objects.order_by('-created_at')
     result = []
 
     for photo in photos:

@@ -1227,13 +1227,14 @@ try {
     init();
     fillScene();
     fetch('/api/photos/')
-    .then(r => r.json())
-    .then(data => {
-        console.log("API DATA:", data);           // ← check full structure
-        console.log("First photo:", data.photos[0]); // ← check what fields exist
-        photoList = data.photos;
-        photoIndex = 0;
-    });
+        .then(r => r.json())
+        .then(data => {
+            photoList = data.photos;
+            photoIndex = 0;
+            if (photoList.length > 0) {
+                loadPhotoAtIndex(0);  // ← load first photo once list is ready
+            }
+        });
     addToDOM();
     animate();
     initBoxClicks();
