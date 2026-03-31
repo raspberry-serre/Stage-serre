@@ -748,7 +748,7 @@ function drawMovableBox() {
         photoLabelMesh = makeLabel('', 4, 0x000000, 72);
         boxGroup.add(photoLabelMesh);
 
-        photoSerreMesh = makeLabel('', 3, 0xff6600, 63);
+        photoSerreMesh = makeLabel('', 3, 0xff6600, -60);
         boxGroup.add(photoSerreMesh);
 
         window.setPhotoLabel = function(path) {
@@ -767,7 +767,7 @@ function drawMovableBox() {
                 boxGroup.remove(photoSerreMesh);
                 photoSerreMesh.geometry.dispose();
             }
-            photoSerreMesh = makeLabel(text, 3, 0xff6600, 63);
+            photoSerreMesh = makeLabel(text, 3, 0xff6600, -60);
             boxGroup.add(photoSerreMesh);
         };
     });
