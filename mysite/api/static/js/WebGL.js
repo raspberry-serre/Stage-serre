@@ -762,7 +762,7 @@ function drawMovableBox() {
         };
 
         window.setSerreLabel = function(serre) {
-            var text = serre ? serre.sol + '  ' + serre.temp + '°C  ' + serre.hum + '  ' + serre.lumière + '  ' + serre.periode + '  ' + serre.servo + '  ' + serre.led + '  ' + serre.eau: '';
+            var text = serre ? serre.sol + '  ' + serre.temp + '°C  ' + serre.hum + '  ' + serre.lumiere + '  ' + serre.periode + '  ' + serre.servo + '  ' + serre.led + '  ' + serre.eau: '';
             if (photoSerreMesh) {
                 boxGroup.remove(photoSerreMesh);
                 photoSerreMesh.geometry.dispose();

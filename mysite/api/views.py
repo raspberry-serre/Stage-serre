@@ -348,13 +348,14 @@ def photo_list(request):
             'path': photo.image.url,
             'created_at': photo.created_at.strftime('%Y-%m-%d %H:%M'),
             'serre': {
-                'created_at': serre.created_at.strftime('%Y-%m-%d %H:%M'),
                 'temp': round(serre.temp, 1),
                 'hum': round(serre.hum, 1),
                 'sol': serre.sol,
                 'lumiere': serre.lumière,
-                'pompe': serre.pompe,
+                'periode': serre.periode,
+                'servo': serre.servo,
                 'led': serre.led,
+                'eau': serre.eau,
             } if serre else None,
         })
 
