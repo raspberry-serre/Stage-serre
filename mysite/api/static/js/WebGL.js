@@ -1,6 +1,10 @@
 "use strict";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FontLoader } from "/static/js/three/FontLoader.js";
+import { TextGeometry } from "/static/js/three/TextGeometry.js";
+
+
 
 var camera, renderer;
 var ground = true;
@@ -54,6 +58,9 @@ var photoList = [];
 var photoIndex = 0;
 var screenTextureBack = null;
 var screenMaterialBack = null;
+var photoLabelMesh = null;
+var photoSerreMesh = null;
+
 
 
 
@@ -720,12 +727,57 @@ function drawMovableBox() {
     frontScreen.rotation.y = Math.PI;
     boxGroup.add(frontScreen);
     
+// Front face: photo name label using TextGeometry
+    var fontLoader = new FontLoader();
+    fontLoader.load('/static/fonts/helvetiker_regular.typeface.json', function(font) {
+        function makeLabel(text, size, color, yPos) {
+            const geo = new TextGeometry(text, {
+                font: font,
+                size: size,
+                curveSegments: 12,
+                height: 1,
+            });
+            geo.center();
+            const mat = new THREE.MeshBasicMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(0, yPos, faceZ);
+            return mesh;
+        }
+
+        // initial empty labels
+        photoLabelMesh = makeLabel('', 4, 0x000000, 72);
+        boxGroup.add(photoLabelMesh);
+
+        photoSerreMesh = makeLabel('', 3, 0xff6600, -60);
+        boxGroup.add(photoSerreMesh);
+
+        window.setPhotoLabel = function(path) {
+            const filename = path.split('/').pop() || 'NO NAME';
+            if (photoLabelMesh) {
+                boxGroup.remove(photoLabelMesh);
+                photoLabelMesh.geometry.dispose();
+            }
+            photoLabelMesh = makeLabel(filename, 4, 0x000000, 72);
+            boxGroup.add(photoLabelMesh);
+        };
+
+        window.setSerreLabel = function(serre) {
+            var text = serre ? 'humSol: '+ serre.sol + '  temp: ' + serre.temp + '°C  humAir: ' + serre.hum + '  lum: ' + serre.lumiere + '  ' + serre.periode + '  servo: ' + serre.servo + '°  LED: ' + serre.led + '  eau: ' + serre.eau + 'ml': '';
+            if (photoSerreMesh) {
+                boxGroup.remove(photoSerreMesh);
+                photoSerreMesh.geometry.dispose();
+            }
+            photoSerreMesh = makeLabel(text, 3, 0x000000, -52);
+            boxGroup.add(photoSerreMesh);
+        };
+    });
+
 
     // Front face: navigation buttons
     var navDefs = [
         { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
         { label: '→', dir: 'right', x:  gap / 2, y: 0 },
-        { label: 'last', dir: 'last', x: 0, y: -60 },
+        { label: 'last', dir: 'last', x: 0, y: -68 },
         { label: 'close', dir: 'close', x: 85, y: 60}
     ];
 
@@ -764,10 +816,10 @@ function drawMovableBox() {
                     screenTexture = newTexture;
                 }
             );
-            scheduleHourlyReload();
+            //scheduleHourlyReload();
         }, msUntilNext);
     }
-    scheduleHourlyReload();
+    //scheduleHourlyReload();
 
     // Back face: scroll button (flips back to front)
     var normalTexB  = makeButtonCanvas('scroll', false);
@@ -816,19 +868,59 @@ var boxRaycaster = new THREE.Raycaster();
 var boxMouse     = new THREE.Vector2();
 
 function loadPhotoAtIndex(i) {
+    console.log("🔥 FUNCTION CALLED 🔥");
     if (!photoList || photoList.length === 0) return;
 
     photoIndex = ((i % photoList.length) + photoList.length) % photoList.length;
 
-    var url = photoList[photoIndex] + '?t=' + Date.now();
+    var photo = photoList[photoIndex];
+
+    console.log("INDEX:", photoIndex);
+    console.log("PHOTO:", photo);
+
+    let path = null;
+
+    if (typeof photo === "string") path = photo;
+    else if (photo.image) path = photo.image;
+    else if (photo.path) path = photo.path;
+
+    console.log("PATH:", path);
+
+    // ✅ UPDATE LABELS HERE
+    if (window.setPhotoLabel) {
+        window.setPhotoLabel(path);
+    }
+
+    if (window.setSerreLabel && photo.serre) {
+        window.setSerreLabel(photo.serre);
+    }
+
+    if (!path) {
+        console.error("Invalid photo object:", photo);
+        return;
+    }
+
+    var url = window.location.origin + path + '?t=' + Date.now();
+
+    console.log("URL:", url);
 
     var old = screenTexture;
-    new THREE.TextureLoader().load(url, function(newTexture) {
-        screenMaterial.map = newTexture;
-        screenMaterial.needsUpdate = true;
-        if (old) old.dispose();
-        screenTexture = newTexture;
-    });
+
+    new THREE.TextureLoader().load(
+        url,
+        function(newTexture) {
+            console.log("TEXTURE LOADED ✅");
+
+            screenMaterial.map = newTexture;
+            screenMaterial.needsUpdate = true;
+
+            screenTexture = newTexture;
+        },
+        undefined,
+        function(err) {
+            console.error("TEXTURE FAILED ❌", url, err);
+        }
+    );
 }
 
 
@@ -922,15 +1014,15 @@ function initBoxClicks() {
                 );
             }
 
-            if (dir === 'left') {
-                // handle left navigation
-                loadPhotoAtIndex(photoIndex - 1);
-            }   
+if (dir === 'left') {
+    console.log("LEFT CLICK");
+    loadPhotoAtIndex(photoIndex + 1);
+}
 
-            if (dir === 'right') {
-                // handle right navigation
-                loadPhotoAtIndex(photoIndex + 1);
-            }
+if (dir === 'right') {
+    console.log("RIGHT CLICK");
+    loadPhotoAtIndex(photoIndex - 1);
+}
         }
     });
 }
@@ -1172,11 +1264,14 @@ try {
     init();
     fillScene();
     fetch('/api/photos/')
-    .then(r => r.json())
-    .then(data => {
-        photoList = data.photos;
-        photoIndex = 0;
-    });
+        .then(r => r.json())
+        .then(data => {
+            photoList = data.photos;
+            photoIndex = 0;
+            if (photoList.length > 0) {
+                loadPhotoAtIndex(0);  // ← load first photo once list is ready
+            }
+        });
     addToDOM();
     animate();
     initBoxClicks();

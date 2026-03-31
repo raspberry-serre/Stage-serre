@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.shortcuts import render, redirect
 from .models import Serre, Usr, Logs, Photo
 from .serializers import SerreSerializer
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.hashers import check_password, make_password
 from .management.commands.logs import log
 import re
@@ -330,6 +330,33 @@ def new_account(request):
 @api_view(['GET'])
 def photo_list(request):
     photos = Photo.objects.order_by('-created_at')
-    return Response({
-        "photos": [p.image.url for p in photos]
-    })
+    result = []
+
+    for photo in photos:
+        start = photo.created_at - timedelta(minutes=1)
+        end   = photo.created_at + timedelta(minutes=1)
+
+        serre = (
+            Serre.objects
+            .filter(created_at__gte=start, created_at__lte=end)
+            .order_by('created_at')
+            .first()
+        )
+
+        result.append({
+            'id': photo.id,
+            'path': photo.image.url,
+            'created_at': photo.created_at.strftime('%Y-%m-%d %H:%M'),
+            'serre': {
+                'temp': round(serre.temp, 1),
+                'hum': round(serre.hum, 1),
+                'sol': serre.sol,
+                'lumiere': serre.lumière,
+                'periode': serre.periode,
+                'servo': serre.servo,
+                'led': serre.led,
+                'eau': serre.eau,
+            } if serre else None,
+        })
+
+    return Response({'photos': result})

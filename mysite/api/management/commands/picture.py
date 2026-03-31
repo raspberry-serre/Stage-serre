@@ -1,7 +1,8 @@
 import cv2
 import time
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from api.models import Photo
@@ -10,24 +11,12 @@ from django.core.files import File
 save_folder = settings.MEDIA_ROOT / 'camera'
 ZOOM = 2.5
 
-NIGHT_START = 20
-NIGHT_END = 6
 
-
-def is_night():
-    hour = datetime.now().hour
-    return hour < NIGHT_END or hour > NIGHT_START
-
-
-def capture_frame():
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
-
+def capture_frame(cap):
     for _ in range(10):
         cap.read()
 
     ret, frame = cap.read()
-    cap.release()
 
     if not ret:
         return False, None
@@ -44,7 +33,7 @@ def capture_frame():
     return True, frame
 
 
-def cleanup_old_photos(max_count=800):
+def cleanup_old_photos(max_count=500):
     total = Photo.objects.count()
     if total <= max_count:
         return
@@ -56,14 +45,14 @@ def cleanup_old_photos(max_count=800):
         try:
             if photo.image and os.path.exists(photo.image.path):
                 os.remove(photo.image.path)
-        except:
-            pass
+        except Exception as e:
+            print("Cleanup error:", e)
 
         photo.delete()
 
 
 def seconds_until_next_slot():
-    now = datetime.now()
+    now = timezone.now()
     minute = now.minute
 
     if minute < 30:
@@ -74,27 +63,36 @@ def seconds_until_next_slot():
     return (next_time - now).total_seconds()
 
 
-
 class Command(BaseCommand):
-    help = 'Take a picture from webcam every new hour'
+    help = 'Take a picture from webcam every 30 minutes'
 
     def handle(self, *args, **kwargs):
+        os.makedirs(save_folder, exist_ok=True)
+
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
+
+        if not cap.isOpened():
+            print("Camera failed to open")
+            return
+
         while True:
             wait_time = seconds_until_next_slot()
-
             time.sleep(wait_time)
 
-            if is_night():
-                continue
+            ret, frame = capture_frame(cap)
 
-            ret, frame = capture_frame()
             if not ret:
+                print("Capture failed, reconnecting camera")
+                cap.release()
+                time.sleep(2)
+                cap = cv2.VideoCapture(0)
+                cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
                 continue
 
-            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            timestamp = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
             filepath = save_folder / f"{timestamp}.jpg"
 
-            cv2.imwrite(str(filepath), frame)
             cv2.imwrite(str(save_folder / "photo_latest.jpg"), frame)
 
             try:
@@ -102,7 +100,7 @@ class Command(BaseCommand):
                     django_file = File(f, name=f"{timestamp}.jpg")
                     Photo.objects.create(image=django_file)
 
-                cleanup_old_photos(max_count=800)
+                cleanup_old_photos(max_count=500)
 
-            except:
-                pass
+            except Exception as e:
+                print("ERROR SAVING PHOTO:", e)

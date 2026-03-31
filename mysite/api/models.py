@@ -15,7 +15,7 @@ class Serre(models.Model):
     eau = models.IntegerField(default=100000)
     debit = models.FloatField(default=0.0)
     pump_on_time = models.FloatField(default=0.0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"Serre {self.id} - Sol: {self.sol}, Temp: {self.temp}, Hum: {self.hum}, Lumière: {self.lumière}, Période: {self.periode}, Servo: {self.servo}, Pompe: {self.pompe}, Led: {self.led}"

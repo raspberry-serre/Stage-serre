@@ -10,7 +10,7 @@ from api.models import Serre  # Adjust if your app name is different
 CMD_FILE = "/tmp/serre_cmds.txt"
 SERIAL_PORTS = ["/dev/ttyACM0", "/dev/ttyACM1"]
 BAUDRATE = 9600
-MAX_RECORDS = 1000
+MAX_RECORDS = 1000000 
 SERIAL_INTERVAL = 0.1  # loop sleep time
 
 # ---------------- COMMAND ----------------
@@ -59,9 +59,15 @@ class Command(BaseCommand):
                             )
                             # ---------------- CLEANUP OLD RECORDS ----------------
                             total = Serre.objects.count()
+                            total = Serre.objects.count()
                             if total > MAX_RECORDS:
-                                oldest = Serre.objects.order_by('created_at')[:total - MAX_RECORDS]
-                                Serre.objects.filter(id__in=oldest.values_list('id', flat=True)).delete()
+                                # Delete exactly the 3600 oldest rows
+                                old_ids = (
+                                    Serre.objects.order_by('id')
+                                    .values_list('id', flat=True)[:3600]
+                                )
+                                Serre.objects.filter(id__in=list(old_ids)).delete()
+
                     except json.JSONDecodeError:
                         pass  # silently ignore bad JSON
             except serial.SerialException:
