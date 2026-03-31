@@ -762,12 +762,12 @@ function drawMovableBox() {
         };
 
         window.setSerreLabel = function(serre) {
-            var text = serre ? 'humSol: '+ serre.sol + '  temp: ' + serre.temp + '°C  humAir: ' + serre.hum + '                       lum: ' + serre.lumiere + '  ' + serre.periode + '  servo: ' + serre.servo + '°  LED: ' + serre.led + '  eau' + serre.eau: 'ml';
+            var text = serre ? 'humSol: '+ serre.sol + '  temp: ' + serre.temp + '°C  humAir: ' + serre.hum + '  lum: ' + serre.lumiere + '  ' + serre.periode + '  servo: ' + serre.servo + '°  LED: ' + serre.led + '  eau: ' + serre.eau + 'ml': '';
             if (photoSerreMesh) {
                 boxGroup.remove(photoSerreMesh);
                 photoSerreMesh.geometry.dispose();
             }
-            photoSerreMesh = makeLabel(text, 3, 0xff6600, -60);
+            photoSerreMesh = makeLabel(text, 3, 0x000000, -52);
             boxGroup.add(photoSerreMesh);
         };
     });
@@ -777,7 +777,7 @@ function drawMovableBox() {
     var navDefs = [
         { label: '←', dir: 'left',  x: -gap / 2, y: 0 },
         { label: '→', dir: 'right', x:  gap / 2, y: 0 },
-        { label: 'last', dir: 'last', x: 0, y: -60 },
+        { label: 'last', dir: 'last', x: 0, y: -68 },
         { label: 'close', dir: 'close', x: 85, y: 60}
     ];
 
