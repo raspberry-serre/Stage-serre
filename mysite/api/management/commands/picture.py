@@ -20,7 +20,7 @@ def is_night():
 
 
 def capture_frame():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("/dev/video0")
     cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
 
     for _ in range(10):
@@ -71,7 +71,7 @@ def seconds_until_next_slot():
     else:
         next_time = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
-    return ((next_time - now).total_seconds())-1
+    return max(0, (next_time - now).total_seconds() - 1)
 
 
 
