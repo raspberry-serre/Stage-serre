@@ -1030,20 +1030,23 @@ if (dir === 'right') {
 function init() {
     var container = document.querySelector('.container');
     var canvasWidth = container.offsetWidth;
-    var canvasHeight = 700;
+
+    // Dynamic height
+    var canvasHeight = window.innerHeight * 0.9; // 90% of screen height
+    if (window.innerWidth < 768) {
+        canvasHeight = window.innerHeight * 0.45; // smaller on mobile
+    }
+
     var canvasRatio = canvasWidth / canvasHeight;
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(canvasWidth, canvasHeight);
     renderer.setClearColor(0x999999, 1.0);
-    // renderer.shadowMap.enabled = true; // shadow_code
 
     camera = new THREE.PerspectiveCamera(30, canvasRatio, 1, 10000);
     cameraControls = new OrbitControls(camera, renderer.domElement);
     camera.position.set(0, 500, 1500);
     cameraControls.target.set(0, 43, -8);
-
-    // lock camera
 
     cameraControls.enablePan = false;
     cameraControls.maxPolarAngle = Math.PI / 2.3;
@@ -1053,6 +1056,7 @@ function init() {
     cameraControls.minDistance = 500;
     cameraControls.maxDistance = 2000;
 }
+
 
 function addToDOM() {
     var container = document.getElementById('webGL');
