@@ -10,20 +10,14 @@ from django.core.files import File
 save_folder = settings.MEDIA_ROOT / 'camera'
 ZOOM = 2.5
 
-NIGHT_START = 20
-NIGHT_END = 6
-
-
-def is_night():
-    hour = datetime.now().hour
-    return hour < NIGHT_END or hour > NIGHT_START
-
 
 def capture_frame():
     cap = cv2.VideoCapture("/dev/video0")
-    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920) 
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
-    for _ in range(10):
+    for _ in range(20):
         cap.read()
 
     ret, frame = cap.read()
@@ -71,7 +65,7 @@ def seconds_until_next_slot():
     else:
         next_time = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
-    return max(0, (next_time - now).total_seconds() - 1)
+    return max(0, (next_time - now).total_seconds())
 
 
 
@@ -83,9 +77,6 @@ class Command(BaseCommand):
             wait_time = seconds_until_next_slot()
 
             time.sleep(wait_time)
-
-            if is_night():
-                continue
 
             ret, frame = capture_frame()
             if not ret:
