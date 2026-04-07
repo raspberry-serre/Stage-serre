@@ -7,25 +7,31 @@ from django.core.management.base import BaseCommand
 from api.models import Photo
 from django.core.files import File
 
+# Dossier de sauvegarde des photos dans MEDIA_ROOT/camera
 save_folder = settings.MEDIA_ROOT / 'camera'
+# Facteur de zoom appliqué à l'image capturée
 ZOOM = 2.5
 
 
 def capture_frame():
+    # Ouvrir la webcam locale
     cap = cv2.VideoCapture("/dev/video0")
     cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920) 
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
+    # Lire plusieurs images pour stabiliser l'exposition
     for _ in range(20):
         cap.read()
 
     ret, frame = cap.read()
     cap.release()
 
+    # Si la capture a échoué, renvoyer False
     if not ret:
         return False, None
 
+    # Appliquer un recadrage centré si un zoom est configuré
     if ZOOM != 1.0:
         h, w = frame.shape[:2]
         new_h = int(h / ZOOM)
@@ -39,6 +45,7 @@ def capture_frame():
 
 
 def cleanup_old_photos(max_count=500):
+    # Supprimer les photos les plus anciennes pour limiter le stockage
     total = Photo.objects.count()
     if total <= max_count:
         return
@@ -51,12 +58,14 @@ def cleanup_old_photos(max_count=500):
             if photo.image and os.path.exists(photo.image.path):
                 os.remove(photo.image.path)
         except:
+            # Ignorer les erreurs de suppression de fichier
             pass
 
         photo.delete()
 
 
 def seconds_until_next_slot():
+    # Calculer le nombre de secondes jusqu'au prochain créneau horaire
     now = datetime.now()
     minute = now.minute
 
@@ -73,9 +82,11 @@ class Command(BaseCommand):
     help = 'Take a picture from webcam every new hour'
 
     def handle(self, *args, **kwargs):
+        # Boucle permanente pour prendre une photo à chaque nouveau créneau
         while True:
             wait_time = seconds_until_next_slot()
 
+            # Attendre jusqu'au prochain 00 ou 30 minutes
             time.sleep(wait_time)
 
             ret, frame = capture_frame()
@@ -85,14 +96,17 @@ class Command(BaseCommand):
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             filepath = save_folder / f"{timestamp}.jpg"
 
+            # Sauvegarder la photo sur le disque
             cv2.imwrite(str(filepath), frame)
             cv2.imwrite(str(save_folder / "photo_latest.jpg"), frame)
 
             try:
+                # Enregistrer la photo dans la base de données Django
                 with open(filepath, 'rb') as f:
                     django_file = File(f, name=f"{timestamp}.jpg")
                     Photo.objects.create(image=django_file)
 
+                # Nettoyer les anciennes images si le nombre dépasse la limite
                 cleanup_old_photos(max_count=500)
 
             except Exception as e:
