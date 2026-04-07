@@ -4,11 +4,12 @@ from api.serializers import UsrSerializer
 from django.contrib.auth.hashers import make_password
 import re
 
-
+# Commande de gestion des utilisateurs du modèle Usr
 class Command(BaseCommand):
     help = "Manage Usr records (list/create)"
 
     def add_arguments(self, parser):
+        # Définir les arguments de la commande: list ou create
         parser.add_argument(
             'action',
             choices=['list', 'create'],
@@ -21,6 +22,7 @@ class Command(BaseCommand):
         action = options['action']
 
         if action == 'list':
+            # Lister tous les utilisateurs existants
             users = Usr.objects.all()
             if not users.exists():
                 self.stdout.write(self.style.WARNING('No users found'))
@@ -37,6 +39,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR('username and password required'))
                 return
 
+            # Vérifier les règles de complexité du mot de passe
             errors = []
             if len(password) < 8:
                 errors.append('at least 8 characters')
