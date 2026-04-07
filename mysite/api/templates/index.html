@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 {% load static %}
+<!-- Template principal affichant l'interface de la serre -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,21 +14,14 @@
             <div>
                 <h1>Données Serre</h1>
             </div>
+            <!-- Zone d'état du compte utilisateur et boutons de contrôle -->
             <div class="status">
                 {% if request.session.username %}
                     <p>Connecté en tant que {{ request.session.username }}</p>
                 {% endif %}
-                {% if request.session.username == "admin" %}
-                <button id="logsBtn"
-                    name="logs"
-                    value="logs">
-                    logs
-                </button>
-                {% endif %}
                 <form method="POST">
                     {% csrf_token %}
                 </form>
-                <div class="status-indicator"></div>
                 <div>
                     <div class="last-update">Dernière mise à jour: <span id="lastUpdate">--:--:--</span></div>
                 </div>
@@ -39,6 +33,13 @@
                         <span class="switch-label off">Autonome</span>
                     </label>
                 </div>
+                {% if request.session.username == "admin" %}
+                <button id="logsBtn"
+                    name="logs"
+                    value="logs">
+                    logs
+                </button>
+                {% endif %}
                 <button id="deconnexionBtn"
                     name="logout"
                     value="deconnexion">
@@ -47,8 +48,10 @@
             </div>
         </header>
 
+        <!-- Message d'erreur affichée dynamiquement par JavaScript -->
         <div class="error-message" id="errorMessage"></div>
         
+        <!-- Grille de cartes de données capteurs -->
         <div class="data-grid">
             <div class="card" id="tempCard">
                 <div class="card-title">Température</div>
@@ -112,14 +115,20 @@
             <div class="card" id="eauCard">
                 <div class="card-title">Eau Stock</div>
                 <div class="card-value">-- ml</div>
+                    {% if request.session.username == "admin" %}
                     <button id="refillBtn"
                         name="commande"
                         value="refill">
                         Refill
                     </button>
+                    {% endif %}
+
                 </div>
             </div>
-<div id="webGL"></div>
+        </div>
+
+        <!-- Conteneur WebGL pour l'affichage 3D de la serre -->
+        <div id="webGL"></div>
 <script type="importmap">
     {
         "imports": {

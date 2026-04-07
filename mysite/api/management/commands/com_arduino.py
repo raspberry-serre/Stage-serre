@@ -7,9 +7,11 @@ from django.db import transaction
 from api.models import Serre  # Adjust if your app name is different
 
 # ---------------- CONFIG ----------------
+# Fichier de commandes écrit par l'application pour Arduino
 CMD_FILE = "/tmp/serre_cmds.txt"
 SERIAL_PORTS = ["/dev/ttyACM0", "/dev/ttyACM1"]
 BAUDRATE = 9600
+# Nombre maximal de lignes conservées en base pour les relevés Arduino
 MAX_RECORDS = 1000000 
 SERIAL_INTERVAL = 0.1  # loop sleep time
 
@@ -60,6 +62,7 @@ class Command(BaseCommand):
                             # ---------------- CLEANUP OLD RECORDS ----------------
                             total = Serre.objects.count()
                             total = Serre.objects.count()
+                            # Si le nombre d'enregistrements dépasse la limite, supprimer les plus anciens
                             if total > MAX_RECORDS:
                                 # Delete exactly the 3600 oldest rows
                                 old_ids = (

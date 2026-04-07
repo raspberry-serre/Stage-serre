@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 {% load static %}
+<!-- Page d'affichage des logs et du filtre par utilisateur -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'style/style.css' %}">
 </head>
 <body>
+    <!-- Entête de la page logs, affichage du nom d'utilisateur et bouton retour -->
     <header>
         <div>
             <h1>Logs</h1>
@@ -20,6 +22,7 @@
         </div>
     </header>
 
+    <!-- Filtre des logs par utilisateur -->
     <div class="card" id="sortCard">
         <div class="card-title">Trier par utilisateur</div>
         <form method="GET" action="">
@@ -34,6 +37,7 @@
         </form>
     </div>
 
+    <!-- Contenu des logs récupérées et affichées sous forme de liste -->
     <div class="card" id="logsCard">
         <div class="card-value" id="logsContent">
             {% if log_lines %}

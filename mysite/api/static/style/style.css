@@ -41,9 +41,27 @@ header {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    header {
+        align-items: flex-start;
+    }
+
+    header > div {
+        flex: 0 0 100%;
+    }
+
+    .status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 h1 {
@@ -53,23 +71,11 @@ h1 {
 
 .status {
     display: flex;
-    align-items: center;
+    align-items: left;
     gap: 10px;
     font-size: 14px;
 }
 
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #4CAF50;
-    animation: blink 1.5s infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
 
 .last-update {
     color: #666;
